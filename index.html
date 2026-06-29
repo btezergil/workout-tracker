@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Workouts">
+<meta name="theme-color" content="#0f0f0f">
+<meta name="description" content="Berke's personal workout tracker — Push/Pull, Antagonist & KB Power sessions">
+<link rel="manifest" href="manifest.json">
+<!-- Apple touch icons (iOS home screen) -->
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>Berke's Workouts</title>
 <style>
   :root {
@@ -956,6 +962,13 @@ function clearHistory() {
   if (!confirm('Delete all sessions? This cannot be undone.')) return;
   localStorage.removeItem('workout_history');
   renderHistory();
+}
+
+// Register service worker for PWA offline support
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
 }
 </script>
 </body>
