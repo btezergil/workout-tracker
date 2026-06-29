@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Berke's Workouts</title>
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --surface2: #242424;
+    --surface3: #2e2e2e;
+    --border: #333;
+    --text: #f0f0f0;
+    --muted: #888;
+    --dim: #555;
+    --push: #4a9eff;
+    --push-bg: #0d2340;
+    --pull: #34c97a;
+    --pull-bg: #0d2b1a;
+    --ant: #a78bfa;
+    --ant-bg: #1a1030;
+    --kb: #f97316;
+    --kb-bg: #2b1500;
+    --warn: #facc15;
+    --warn-bg: #2b2000;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100dvh;
+    overscroll-behavior: none;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; flex-direction: column; min-height: 100dvh; }
+  .screen.active { display: flex; }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px 12px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar-title { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+  .topbar-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .topbar-action { font-size: 14px; color: var(--push); font-weight: 500; cursor: pointer; padding: 4px 0; }
+  .topbar-back { font-size: 22px; color: var(--push); cursor: pointer; line-height: 1; padding: 4px 8px 4px 0; }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding-bottom: env(safe-area-inset-bottom, 8px);
+  }
+  .nav-btn {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    padding: 10px 0 6px; gap: 3px; cursor: pointer; border: none; background: none;
+    color: var(--muted); font-size: 10px; font-weight: 500;
+    transition: color 0.15s;
+  }
+  .nav-btn.active { color: var(--push); }
+  .nav-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .nav-spacer { height: 70px; flex-shrink: 0; }
+
+  /* ── SCROLLABLE CONTENT ── */
+  .scroll-area { flex: 1; overflow-y: auto; padding: 12px 16px; -webkit-overflow-scrolling: touch; }
+
+  /* ── SPLIT CARDS (home) ── */
+  .split-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    transition: background 0.12s;
+    -webkit-user-select: none; user-select: none;
+  }
+  .split-card:active { background: var(--surface2); }
+  .split-dot {
+    width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+  }
+  .split-info { flex: 1; }
+  .split-name { font-size: 15px; font-weight: 600; }
+  .split-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .split-arrow { color: var(--dim); font-size: 18px; }
+
+  /* ── BADGES ── */
+  .badge {
+    display: inline-block; font-size: 10px; font-weight: 600;
+    padding: 2px 8px; border-radius: 20px; letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .badge-push { background: var(--push-bg); color: var(--push); }
+  .badge-pull { background: var(--pull-bg); color: var(--pull); }
+  .badge-ant  { background: var(--ant-bg);  color: var(--ant);  }
+  .badge-kb   { background: var(--kb-bg);   color: var(--kb);   }
+
+  /* ── SECTION LABELS ── */
+  .section-label {
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin: 20px 0 8px;
+  }
+
+  /* ── EXERCISE CARDS (workout view) ── */
+  .ex-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .ex-header {
+    padding: 12px 14px;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+  }
+  .ex-name { font-size: 14px; font-weight: 600; }
+  .ex-scheme { font-size: 13px; color: var(--push); font-weight: 500; white-space: nowrap; }
+  .ex-muscle { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .ex-note {
+    font-size: 12px; color: #aaa; line-height: 1.5;
+    padding: 0 14px 10px;
+    display: none;
+  }
+  .ex-note.open { display: block; }
+  .ex-note-toggle {
+    font-size: 11px; color: var(--dim); cursor: pointer;
+    padding: 0 14px 10px; display: inline-block;
+  }
+
+  /* ── LOG ROWS (inside session) ── */
+  .log-area { background: var(--surface2); padding: 10px 14px; border-top: 1px solid var(--border); }
+  .log-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 0; border-bottom: 1px solid var(--border);
+  }
+  .log-row:last-of-type { border-bottom: none; }
+  .log-set-num { font-size: 12px; color: var(--muted); width: 24px; flex-shrink: 0; }
+  .log-input {
+    flex: 1; background: var(--surface3); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 6px 8px;
+    color: var(--text); font-size: 14px; text-align: center;
+    -webkit-appearance: none; appearance: none;
+    min-width: 0;
+  }
+  .log-input:focus { outline: none; border-color: var(--push); }
+  .log-input::placeholder { color: var(--dim); }
+  .log-x { font-size: 14px; color: var(--dim); padding: 0 2px; }
+  .log-done-btn {
+    font-size: 12px; padding: 5px 10px; border-radius: var(--radius-sm);
+    background: var(--surface3); border: 1px solid var(--border);
+    color: var(--muted); cursor: pointer;
+  }
+  .log-done-btn.done { background: #0d2b1a; border-color: var(--pull); color: var(--pull); }
+  .log-add-set {
+    font-size: 12px; color: var(--push); cursor: pointer;
+    padding: 6px 0 2px; display: block;
+  }
+
+  /* ── START SESSION BUTTON ── */
+  .start-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--push); color: #fff;
+    border: none; border-radius: var(--radius);
+    padding: 15px 20px; font-size: 16px; font-weight: 600;
+    cursor: pointer; width: 100%; margin-top: 12px;
+    letter-spacing: -0.2px;
+  }
+  .start-btn:active { opacity: 0.85; }
+
+  .finish-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--pull); color: #fff;
+    border: none; border-radius: var(--radius);
+    padding: 15px 20px; font-size: 16px; font-weight: 600;
+    cursor: pointer; width: 100%; margin-top: 12px;
+  }
+  .finish-btn:active { opacity: 0.85; }
+
+  /* ── TIMER ── */
+  .timer-bar {
+    background: var(--surface2); border-bottom: 1px solid var(--border);
+    padding: 8px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .timer-label { font-size: 12px; color: var(--muted); }
+  .timer-val { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: 0.02em; }
+
+  /* ── INFO BOX ── */
+  .info-box {
+    background: var(--warn-bg); border: 1px solid #5a4400;
+    border-radius: var(--radius); padding: 12px 14px; margin-bottom: 10px;
+  }
+  .info-box-title { font-size: 12px; font-weight: 600; color: var(--warn); margin-bottom: 4px; }
+  .info-box-body { font-size: 12px; color: #bbb; line-height: 1.6; }
+
+  /* ── HISTORY ── */
+  .history-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px;
+  }
+  .history-header { display: flex; justify-content: space-between; align-items: flex-start; }
+  .history-name { font-size: 15px; font-weight: 600; }
+  .history-date { font-size: 12px; color: var(--muted); }
+  .history-duration { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .history-exercises { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+  .history-ex-row { font-size: 12px; color: #aaa; padding: 2px 0; }
+  .history-ex-row strong { color: var(--text); }
+  .history-delete {
+    font-size: 12px; color: #cc4444; cursor: pointer;
+    background: none; border: none; padding: 2px 0; margin-top: 8px;
+  }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty-state-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-state-text { font-size: 14px; line-height: 1.6; }
+
+  /* ── SUPERSET LABEL ── */
+  .ss-label {
+    font-size: 10px; font-weight: 600; color: var(--ant);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 6px 14px 4px;
+    background: var(--ant-bg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── SKILL LADDER ── */
+  .skill-ladder {
+    display: flex; gap: 0; border-radius: var(--radius); overflow: hidden;
+    border: 1px solid var(--border); margin-bottom: 12px;
+  }
+  .skill-step {
+    flex: 1; padding: 8px 4px; text-align: center;
+    border-right: 1px solid var(--border); background: var(--surface);
+  }
+  .skill-step:last-child { border-right: none; }
+  .skill-step-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+  .skill-step-name { font-size: 11px; font-weight: 600; color: #ccc; margin-top: 2px; }
+  .skill-step.active { background: var(--kb-bg); }
+  .skill-step.active .skill-step-name { color: var(--kb); }
+
+  /* ── EMOM BLOCK ── */
+  .emom-block {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 8px; overflow: hidden;
+  }
+  .emom-head {
+    background: var(--kb-bg); border-bottom: 1px solid var(--border);
+    padding: 9px 14px; display: flex; justify-content: space-between;
+  }
+  .emom-head-title { font-size: 13px; font-weight: 600; color: var(--kb); }
+  .emom-head-dur { font-size: 12px; color: var(--muted); }
+  .emom-body { padding: 8px 14px; }
+  .emom-row {
+    display: flex; justify-content: space-between;
+    font-size: 12px; padding: 5px 0; border-bottom: 1px solid var(--border);
+  }
+  .emom-row:last-child { border-bottom: none; }
+  .emom-row-ex { color: #ccc; }
+  .emom-row-rep { color: var(--kb); font-weight: 600; }
+  .emom-note { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+
+  /* ── UPGRADE BOX ── */
+  .upgrade-box {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-left: 3px solid var(--warn); border-radius: var(--radius);
+    padding: 12px 14px; margin-top: 8px;
+  }
+  .upgrade-title { font-size: 12px; font-weight: 600; color: var(--warn); margin-bottom: 4px; }
+  .upgrade-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .upgrade-body strong { color: #ccc; }
+
+  /* ── MISC ── */
+  .prog-tip {
+    font-size: 11px; color: #5588cc; padding: 6px 14px 8px;
+    border-top: 1px solid var(--border);
+  }
+  .prog-tip::before { content: '↑ '; }
+
+  @media (min-width: 480px) {
+    .scroll-area { max-width: 480px; margin: 0 auto; }
+    .topbar, .bottom-nav { max-width: 480px; left: 50%; transform: translateX(-50%); }
+    .timer-bar { max-width: 480px; margin: 0 auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════ HOME ══════════════════════════════════ -->
+<div id="screen-home" class="screen active">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">My Workouts</div>
+      <div class="topbar-sub">Choose a session to start</div>
+    </div>
+  </div>
+  <div class="scroll-area">
+
+    <div class="section-label">Push / Pull</div>
+
+    <div class="split-card" onclick="openWorkout('push-a')">
+      <div class="split-dot" style="background:var(--push)"></div>
+      <div class="split-info">
+        <div class="split-name">Push A <span class="badge badge-push">Push</span></div>
+        <div class="split-meta">Chest & shoulder focus · 6 exercises</div>
+      </div>
+      <div class="split-arrow">›</div>
+    </div>
+
+    <div class="split-card" onclick="openWorkout('pull-a')">
+      <div class="split-dot" style="background:var(--pull)"></div>
+      <div class="split-info">
+        <div class="split-name">Pull A <span class="badge badge-pull">Pull</span></div>
+        <div class="split-meta">Back & bicep focus · 6 exercises</div>
+      </div>
+      <div class="split-arrow">›</div>
+    </div>
+
+    <div class="split-card" onclick="openWorkout('push-b')">
+      <div class="split-dot" style="background:var(--push)"></div>
+      <div class="split-info">
+        <div class="split-name">Push B <span class="badge badge-push">Push</span></div>
+        <div class="split-meta">Shoulder & tricep focus · 6 exercises</div>
+      </div>
+      <div class="split-arrow">›</div>
+    </div>
+
+    <div class="split-card" onclick="openWorkout('pull-b')">
+      <div class="split-dot" style="background:var(--pull)"></div>
+      <div class="split-info">
+        <div class="split-name">Pull B <span class="badge badge-pull">Pull</span></div>
+        <div class="split-meta">Width & bicep focus · 6 exercises</div>
+      </div>
+      <div class="split-arrow">›</div>
+    </div>
+
+    <div class="section-label">Antagonist (Supersets)</div>
+
+    <div class="split-card" onclick="openWorkout('ant-1')">
+      <div class="split-dot" style="background:var(--ant)"></div>
+      <div class="split-info">
+        <div class="split-name">Antagonist Day 1 <span class="badge badge-ant">Supersets</span></div>
+        <div class="split-meta">Chest & back · 6 exercise pairs</div>
+      </div>
+      <div class="split-arrow">›</div>
+    </div>
+
+    <div class="split-card" onclick="openWorkout('ant-2')">
+      <div class="split-dot" style="background:var(--ant)"></div>
+      <div class="split-info">
+        <div class="split-name">Antagonist Day 2 <span class="badge badge-ant">Supersets</span></div>
+        <div class="split-meta">Shoulders & arms · 8 exercise pairs</div>
+      </div>
+      <div class="split-arrow">›</div>
+    </div>
+
+    <div class="section-label">Explosive</div>
+
+    <div class="split-card" onclick="openWorkout('kb-power')">
+      <div class="split-dot" style="background:var(--kb)"></div>
+      <div class="split-info">
+        <div class="split-name">KB Power <span class="badge badge-kb">Power</span></div>
+        <div class="split-meta">Swings · cleans · snatches · EMOM</div>
+      </div>
+      <div class="split-arrow">›</div>
+    </div>
+
+    <div class="nav-spacer"></div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn active" onclick="showScreen('home')">
+      <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+      Workouts
+    </button>
+    <button class="nav-btn" onclick="showScreen('history')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+      History
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════ WORKOUT VIEW ══════════════════════════ -->
+<div id="screen-workout" class="screen">
+  <div class="topbar">
+    <div class="topbar-back" onclick="goHome()">‹</div>
+    <div style="flex:1">
+      <div class="topbar-title" id="wkt-title">Workout</div>
+      <div class="topbar-sub" id="wkt-sub"></div>
+    </div>
+  </div>
+  <div class="timer-bar" id="timer-bar" style="display:none">
+    <div>
+      <div class="timer-label">Session time</div>
+      <div class="timer-val" id="timer-val">0:00</div>
+    </div>
+    <button class="finish-btn" style="width:auto;padding:8px 16px;font-size:14px;margin:0" onclick="finishSession()">Finish & Save</button>
+  </div>
+  <div class="scroll-area" id="workout-content"></div>
+</div>
+
+<!-- ══════════════════════════════════ HISTORY ════════════════════════════════ -->
+<div id="screen-history" class="screen">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">History</div>
+      <div class="topbar-sub">Past sessions</div>
+    </div>
+    <div class="topbar-action" onclick="clearHistory()">Clear all</div>
+  </div>
+  <div class="scroll-area" id="history-content">
+    <div class="nav-spacer"></div>
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-btn" onclick="showScreen('home')">
+      <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+      Workouts
+    </button>
+    <button class="nav-btn active" onclick="showScreen('history')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+      History
+    </button>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════════════════════════════════ */
+const WORKOUTS = {
+  'push-a': {
+    id: 'push-a', name: 'Push A', type: 'push',
+    sub: 'Chest & shoulder focus · ~45–55 min',
+    info: null,
+    groups: [{
+      label: null,
+      exercises: [
+        { name: 'Dumbbell flat bench press', scheme: '4 × 8–10', muscle: 'Pecs, anterior delts, triceps', note: 'Control the lowering ~2s. Elbows ~45° from torso, not flared wide. Load 18–20kg.', prog: 'At 23kg ceiling: shift to 4s eccentric or 2s pause at chest.' },
+        { name: 'Dumbbell incline press', scheme: '3 × 10–12', muscle: 'Upper pecs, anterior delts', note: 'Bench at 30–45°. Upper chest is typically weaker — expect 14–18kg here vs flat bench.' },
+        { name: 'Dumbbell shoulder press (seated)', scheme: '3 × 10–12', muscle: 'Lateral & anterior delts, triceps', note: 'Sit upright on bench. Press up and slightly in, don\'t lock elbows at top. ~14–18kg.', prog: 'At 23kg ceiling: shift to pause reps (2s at bottom).' },
+        { name: 'Dumbbell lateral raise', scheme: '3 × 14–16', muscle: 'Lateral delts', note: 'Slight forward lean, slight elbow bend. Think "pouring a jug". Load exactly 5–7kg — your loadable DBs shine here.', alt: 'Band: anchor under foot, raise one arm at a time for constant tension.' },
+        { name: 'Dumbbell flat chest fly', scheme: '3 × 12–14', muscle: 'Pec isolation, shoulder stretch', note: 'Wide arc, deep chest stretch. Keep moderate — 10–14kg. This is isolation, not pressing.' },
+        { name: 'Overhead tricep extension (DB)', scheme: '3 × 12', muscle: 'Triceps (long head)', note: 'Hold one DB with both hands overhead. Lower behind head slowly. Long head only fully stretched here. Use 12–16kg.', alt: 'Band: anchor behind you at head height, extend overhead.' }
+      ]
+    }],
+    upgrade: 'Flat bench hits the 23kg ceiling before other exercises. When it does: slower eccentric (4s down) → pause reps (2s at chest) → reduce rest time → consider heavier loadable handles.'
+  },
+
+  'pull-a': {
+    id: 'pull-a', name: 'Pull A', type: 'pull',
+    sub: 'Back & bicep focus · ~45–55 min',
+    groups: [{
+      label: null,
+      exercises: [
+        { name: 'Single-arm KB row', scheme: '4 × 8–10 each', muscle: 'Lats, rhomboids, rear delt, biceps', note: '20kg KB. Brace knee on bench. Row toward hip, not armpit. Pause at top 1s. Lower slowly — eccentric matters.' },
+        { name: 'Bent-over dumbbell row (bilateral)', scheme: '3 × 10–12', muscle: 'Lats, mid-back, traps', note: 'Hinge ~45°. Pull elbows toward hips. Avoid shrugging at top. Load 18–22kg.', prog: 'At 23kg: slow eccentric to 3s or switch to single-arm supported row.' },
+        { name: 'Dumbbell reverse fly (bent over)', scheme: '3 × 14–16', muscle: 'Rear delts, upper traps', note: 'Wide arc, squeeze at top. Light — 5–8kg. Bad form here causes shoulder issues.', alt: 'Lie face-down on inclined bench for stricter form.' },
+        { name: 'Resistance band pull-apart', scheme: '3 × 15–20', muscle: 'Rear delts, rhomboids, external rotators', note: 'Hold band at shoulder height, pull to a T. Critical for shoulder health — don\'t skip this.' },
+        { name: 'Dumbbell bicep curl', scheme: '3 × 12', muscle: 'Biceps brachii', note: 'Supinate as you curl. Slow 2–3s eccentric. Load 12–16kg precisely.' },
+        { name: 'Hammer curl', scheme: '2 × 14', muscle: 'Brachialis, brachioradialis', note: 'Neutral grip. Adds arm thickness the regular curl misses. Same or slightly heavier than curl load.' }
+      ]
+    }],
+    upgrade: 'Pull-up bar (~$25–40 doorframe bar) is the single best addition. Pull-ups can\'t be replicated well with dumbbells. Your rows are well covered — the gap is vertical pulling.'
+  },
+
+  'push-b': {
+    id: 'push-b', name: 'Push B', type: 'push',
+    sub: 'Shoulder & tricep focus · ~45 min',
+    groups: [{
+      label: null,
+      exercises: [
+        { name: 'Kettlebell single-arm press', scheme: '4 × 6–8 each', muscle: 'Deltoids, triceps, core stability', note: 'Stand, clean to rack, press overhead. Brace core hard — offset load challenges stability. 20kg KB. Switch sides each set.' },
+        { name: 'Dumbbell Arnold press', scheme: '3 × 10–12', muscle: 'All 3 deltoid heads, triceps', note: 'Start palms facing you, rotate out as you press. 14–18kg — slightly lighter than a regular press due to the rotation.' },
+        { name: 'Dumbbell incline chest fly', scheme: '3 × 12–14', muscle: 'Upper pecs, stretch focus', note: '30–45° incline. Wide arc, control the stretch, squeeze at top. 10–14kg.' },
+        { name: 'Lateral raise (DB or band)', scheme: '3 × 15–20', muscle: 'Lateral delts', note: 'Load exactly 5–7kg. Band gives constant tension if preferred.' },
+        { name: 'Diamond push-up', scheme: '3 × max reps', muscle: 'Triceps, inner pecs', note: 'Hands close in diamond shape. Scale: hands on bench = easier, feet elevated = harder. Add weight plate on back when easy.' },
+        { name: 'Band tricep pushdown', scheme: '3 × 15–18', muscle: 'Triceps', note: 'Anchor band over door. Elbows pinned at sides. Full extension at bottom, squeeze hard.' }
+      ]
+    }]
+  },
+
+  'pull-b': {
+    id: 'pull-b', name: 'Pull B', type: 'pull',
+    sub: 'Width & bicep focus · ~45 min',
+    groups: [{
+      label: null,
+      exercises: [
+        { name: 'Resistance band lat pulldown', scheme: '4 × 12–15', muscle: 'Lats, teres major, biceps', note: 'Anchor high over door. Pull elbows down and back toward hips. Use thicker band for more resistance.', alt: 'Replace with pull-ups when you add a bar — this is the bridge until then.' },
+        { name: 'Gorilla row (KB)', scheme: '3 × 8–10 each', muscle: 'Lats, rhomboids, core', note: 'Two KBs on floor, wide hinge stance. Row one while stabilising with the other. 20kg + 8kg, or two loaded DBs.' },
+        { name: 'Kettlebell swing', scheme: '3 × 15–20', muscle: 'Glutes, hamstrings, lats, traps', note: '20kg KB. Hip hinge drive — not a squat, not a shoulder raise. Explosive hip extension. Lats brace like cracking a walnut in your armpit.' },
+        { name: 'Band face pull', scheme: '3 × 15', muscle: 'Rear delts, external rotators, upper traps', note: 'Anchor at face height. Pull to nose with elbows high and wide. Non-negotiable for shoulder health if you bench regularly.' },
+        { name: 'Incline dumbbell curl', scheme: '3 × 12', muscle: 'Bicep long head (peak)', note: 'Sit on inclined bench, arms hanging behind torso. Full stretch → full curl. 10–14kg. One of the best exercises for bicep peak.' },
+        { name: 'Dumbbell shrug', scheme: '3 × 15', muscle: 'Upper traps', note: 'Elevate straight up, don\'t roll. 18–23kg — one of the few exercises where you can use close to max DB weight.' }
+      ]
+    }]
+  },
+
+  'ant-1': {
+    id: 'ant-1', name: 'Antagonist Day 1', type: 'ant',
+    sub: 'Chest & back supersets · ~50 min',
+    info: 'Each pair (A+B) is a superset — do A, 15–20s to set up, do B, then rest 90s. The bench press and KB row pair perfectly: bench stretches the lats, row stretches the pecs.',
+    groups: [
+      {
+        label: 'Superset 1 — compound horizontal',
+        exercises: [
+          { name: '1A · Dumbbell flat bench press', scheme: '4 × 8–10', muscle: 'Pecs, anterior delts, triceps', note: '20–23kg. The back row that follows actively helps chest recover faster than passive rest.', prog: 'At 23kg ceiling: 4s eccentric or 2s pause at chest.' },
+          { name: '1B · Single-arm KB row', scheme: '4 × 8–10 each', muscle: 'Lats, rhomboids, biceps', note: '20kg KB. Row to hip, pause at top. Perfect horizontal push/pull pair.' }
+        ]
+      },
+      {
+        label: 'Superset 2 — upper chest + lat width',
+        exercises: [
+          { name: '2A · Dumbbell incline press', scheme: '3 × 10–12', muscle: 'Upper pecs, anterior delts', note: '16–20kg. Controlled eccentric.' },
+          { name: '2B · Band lat pulldown', scheme: '3 × 12–15', muscle: 'Lats, teres major', note: 'Anchor over door. Vertical pull pairs with incline press.', alt: 'Replace with pull-ups when you have a bar.' }
+        ]
+      },
+      {
+        label: 'Superset 3 — isolation fly pair',
+        exercises: [
+          { name: '3A · Dumbbell chest fly', scheme: '3 × 12–14', muscle: 'Pec isolation', note: '10–14kg. Wide arc, feel the stretch.' },
+          { name: '3B · Bent-over reverse fly', scheme: '3 × 14–16', muscle: 'Rear delts, upper back', note: '5–8kg. Exact opposite movement plane to the fly. Perfect antagonist pair.' }
+        ]
+      }
+    ]
+  },
+
+  'ant-2': {
+    id: 'ant-2', name: 'Antagonist Day 2', type: 'ant',
+    sub: 'Shoulders & arms supersets · ~45 min',
+    info: 'Biceps and triceps are the purest antagonist pair. The bicep pump actively improves tricep contraction quality. Fine-tune DB load by 1–2kg — it matters a lot on smaller muscles.',
+    groups: [
+      {
+        label: 'Superset 1 — vertical push + pull',
+        exercises: [
+          { name: '1A · DB shoulder press (seated)', scheme: '4 × 10–12', muscle: 'All deltoid heads, triceps', note: '16–20kg. Paired overhead push + pull decompresses shoulder joint.' },
+          { name: '1B · Band face pull', scheme: '4 × 15', muscle: 'Rear delts, external rotators', note: 'Elbows high and wide. Best corrective for anyone who presses a lot.' }
+        ]
+      },
+      {
+        label: 'Superset 2 — biceps + triceps',
+        exercises: [
+          { name: '2A · Dumbbell bicep curl', scheme: '3 × 12', muscle: 'Biceps brachii', note: '12–16kg. Supinate at top. Slow eccentric.' },
+          { name: '2B · Overhead tricep extension (DB)', scheme: '3 × 12', muscle: 'Triceps (long head)', note: '14–18kg. The bicep pump from 2A directly enhances tricep contraction quality.' }
+        ]
+      },
+      {
+        label: 'Superset 3 — isolation arms',
+        exercises: [
+          { name: '3A · Hammer curl', scheme: '3 × 14', muscle: 'Brachialis, forearm', note: '12–16kg. Neutral grip. Can go slightly heavier than supinated curls.' },
+          { name: '3B · Band tricep pushdown', scheme: '3 × 15–18', muscle: 'Triceps (all heads)', note: 'Elbows fixed at sides. Full extension at bottom. Go immediately after hammer curls.' }
+        ]
+      },
+      {
+        label: 'Superset 4 — lateral + rear delt',
+        exercises: [
+          { name: '4A · DB lateral raise', scheme: '3 × 14–16', muscle: 'Lateral delts', note: '5–7kg precisely. Strict form, slow movement.' },
+          { name: '4B · Band pull-apart', scheme: '3 × 15–20', muscle: 'Rear delts, external rotators', note: 'Pull band to a T at shoulder height. Exact opposite arc to the lateral raise.' }
+        ]
+      }
+    ]
+  },
+
+  'kb-power': {
+    id: 'kb-power', name: 'KB Power', type: 'kb',
+    sub: 'Explosive & conditioning · ~40–50 min',
+    info: 'Skill ladder — each exercise is a progression of the one before. Swing is the foundation of everything. Clean = swing that catches in rack. Snatch = clean that punches through overhead. Master each step before moving up. EMOM: do your reps, rest the remainder of the minute.',
+    skillLadder: ['Two-hand swing', 'One-hand swing', 'High pull', 'Clean', 'Snatch'],
+    groups: [
+      {
+        label: 'Warm-up · 5–8 min',
+        exercises: [
+          { name: 'KB halo', scheme: '2 × 8 each dir.', muscle: 'Shoulders, thoracic spine', note: 'Hold KB by horns at chest. Slowly circle it around your head. Primes the shoulder joint before overhead work.' },
+          { name: 'KB good morning (light)', scheme: '2 × 10', muscle: 'Hamstrings, glutes, lower back', note: 'Hold 8kg KB at chest. Hinge at hips with soft knees until you feel hamstring stretch. Activates the posterior chain you\'ll use in everything today.' },
+          { name: 'Two-hand swing (warm-up)', scheme: '2 × 10 @ 8kg', muscle: 'Full posterior chain', note: 'Even if comfortable with 20kg swings, always groove the pattern with the lighter bell first.' }
+        ]
+      },
+      {
+        label: 'Block A — Swing EMOM · 10 min',
+        emom: { title: 'Every minute on the minute × 10 rounds', duration: '10 min', rows: [{ ex: 'Odd minutes (1, 3, 5…)', reps: '15 two-hand swings @ 20kg' }, { ex: 'Even minutes (2, 4, 6…)', reps: '10 one-hand swings each side @ 20kg' }], note: 'Finish reps in ~25–35s, rest the remainder. If breathing too hard to speak, reduce reps by 2–3.' },
+        exercises: [
+          { name: 'Two-hand swing', scheme: 'Foundation', muscle: 'Glutes, hamstrings, lats, traps, core', note: 'Hike bell back between legs, explosive hip snap forward. Bell floats to shoulder height — hips do the work, not arms. Lock out at top: glutes squeezed, quads tight, lats engaged.' },
+          { name: 'One-hand swing', scheme: 'Step 1', muscle: 'Posterior chain + anti-rotation core', note: 'Same hip drive as two-hand. Free hand mirrors the working arm. Core fights to keep hips and shoulders square — this is where oblique strength develops. Start with 8kg if 20kg feels unstable one-handed.' }
+        ]
+      },
+      {
+        label: 'Block B — Clean practice · 3 sets',
+        exercises: [
+          { name: 'KB high pull', scheme: '3 × 5 each · rest 90s', muscle: 'Posterior chain, traps, biceps', note: 'Bridge between swing and clean. Swing up, lead with elbow pulling high. Don\'t catch in rack — just let bell float and descend. 20kg. Teaches the upward path the clean follows.' },
+          { name: 'KB clean (single arm)', scheme: '3 × 5 each · rest 90s', muscle: 'Full posterior chain, biceps, grip, core', note: 'Swing back, explosive hip drive, then guide — don\'t muscle — the bell into rack (fist at shoulder, elbow tucked, bell resting on forearm). Bell should float up; wrist rotates at top to receive it softly. Loud thwack = swinging too wide. 20kg.', prog: 'If clean is new, spend 2–3 sessions just on this block before adding snatch.' },
+          { name: 'Clean + press complex', scheme: '2 × 4 each · rest 90s', muscle: 'Full body — posterior chain + overhead press', note: 'Clean to rack, then press overhead. Two explosive moves linked. Excellent full-body power builder. 20kg.' }
+        ]
+      },
+      {
+        label: 'Block C — Snatch intro · 8kg only',
+        snatchWarning: true,
+        exercises: [
+          { name: 'KB snatch (single arm)', scheme: '3 × 5 each @ 8kg · rest 90s', muscle: 'Full posterior chain, shoulder stability, grip', note: 'Swing back, explosive hip drive, punch your hand through as bell passes chest — think "punch the sky" not "swing the bell." Bell lands softly overhead with arm locked. Lower by guiding back to swing. Keep bell close to body throughout — path is vertical, not arcing wide.', prog: 'Progress to 20kg only after 3–4 weeks of clean 8kg snatches. Respect the learning curve.' }
+        ]
+      },
+      {
+        label: 'Finisher — conditioning · 5 min',
+        emom: { title: '30s on / 30s off × 5 rounds', duration: '5 min', rows: [{ ex: 'Two-hand swing @ 20kg', reps: 'Max reps in 30s' }], note: 'Count reps each round and try to match or beat previous rounds. You should be breathing heavily.' },
+        exercises: []
+      }
+    ],
+    upgrade: 'Your 20kg KB is excellent for swings and cleans. 8kg is perfect for snatch learning.\n\n16kg kettlebell — bridges snatch progression between 8kg and 20kg. Most people struggle jumping straight from 8 to 20kg on the snatch.\n\n24kg kettlebell — natural next step for swings and cleans when 20kg gets easy.'
+  }
+};
+
+/* ══════════════════════════════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════════════════════════════ */
+let currentWorkoutId = null;
+let sessionActive = false;
+let sessionStart = null;
+let timerInterval = null;
+let setData = {};   // { exerciseIndex: { sets: [{kg:'', reps:'', done:false}] } }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   NAVIGATION
+══════════════════════════════════════════════════════════════════════════ */
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  if (name === 'history') renderHistory();
+}
+
+function goHome() {
+  if (sessionActive) {
+    if (!confirm('Stop this session without saving?')) return;
+    stopTimer();
+    sessionActive = false;
+  }
+  showScreen('home');
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   WORKOUT VIEW
+══════════════════════════════════════════════════════════════════════════ */
+function openWorkout(id) {
+  currentWorkoutId = id;
+  sessionActive = false;
+  setData = {};
+  const wkt = WORKOUTS[id];
+  document.getElementById('wkt-title').textContent = wkt.name;
+  document.getElementById('wkt-sub').textContent = wkt.sub;
+  document.getElementById('timer-bar').style.display = 'none';
+
+  const content = document.getElementById('workout-content');
+  content.innerHTML = buildWorkoutHTML(wkt);
+  showScreen('workout');
+}
+
+function buildWorkoutHTML(wkt) {
+  let html = '';
+  const typeColor = { push: 'var(--push)', pull: 'var(--pull)', ant: 'var(--ant)', kb: 'var(--kb)' }[wkt.type];
+
+  // Info box
+  if (wkt.info) {
+    html += `<div class="info-box"><div class="info-box-title">How this works</div><div class="info-box-body">${wkt.info}</div></div>`;
+  }
+
+  // Skill ladder (KB)
+  if (wkt.skillLadder) {
+    html += `<div class="skill-ladder">`;
+    wkt.skillLadder.forEach((s, i) => {
+      html += `<div class="skill-step ${i === 0 ? 'active' : ''}"><div class="skill-step-label">${i === 0 ? 'Base' : 'Step ' + i}</div><div class="skill-step-name">${s}</div></div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Exercise groups
+  let exGlobalIdx = 0;
+  wkt.groups.forEach(group => {
+    if (group.label) html += `<div class="section-label" style="color:${typeColor}">${group.label}</div>`;
+
+    // EMOM block
+    if (group.emom) {
+      const e = group.emom;
+      html += `<div class="emom-block"><div class="emom-head"><span class="emom-head-title">${e.title}</span><span class="emom-head-dur">${e.duration}</span></div><div class="emom-body">`;
+      e.rows.forEach(r => { html += `<div class="emom-row"><span class="emom-row-ex">${r.ex}</span><span class="emom-row-rep">${r.reps}</span></div>`; });
+      if (e.note) html += `<div class="emom-note">${e.note}</div>`;
+      html += `</div></div>`;
+    }
+
+    // Snatch warning
+    if (group.snatchWarning) {
+      html += `<div class="info-box" style="border-color:#7a3300;"><div class="info-box-title" style="color:var(--kb)">⚠ Learn this right or skip it for now</div><div class="info-box-body">The snatch is the most technical KB move. A rushed snatch leads to wrist bruising and shoulder strain. Only add this block once your swing and clean feel completely natural. Start exclusively with the 8kg bell.</div></div>`;
+    }
+
+    group.exercises.forEach(ex => {
+      const idx = exGlobalIdx++;
+      if (!setData[idx]) setData[idx] = { sets: [{ kg: '', reps: '', done: false }] };
+      html += buildExCard(ex, idx, typeColor, wkt.type === 'ant');
+    });
+  });
+
+  // Upgrade box
+  if (wkt.upgrade) {
+    html += `<div class="upgrade-box"><div class="upgrade-title">Equipment notes</div><div class="upgrade-body">${wkt.upgrade.replace(/\n\n/g,'<br><br>')}</div></div>`;
+  }
+
+  // Start button
+  html += `<button class="start-btn" onclick="startSession()">Start session</button>`;
+  html += `<div class="nav-spacer"></div>`;
+
+  return html;
+}
+
+function buildExCard(ex, idx, typeColor, isAnt) {
+  const bg = isAnt ? 'background:var(--ant-bg);border-color:#3a2a60' : '';
+  let html = `<div class="ex-card" id="excard-${idx}" style="${bg}">
+    <div class="ex-header">
+      <div style="flex:1">
+        <div class="ex-name">${ex.name}</div>
+        <div class="ex-muscle">${ex.muscle}</div>
+      </div>
+      <div class="ex-scheme" style="color:${typeColor}">${ex.scheme}</div>
+    </div>`;
+
+  if (ex.note || ex.alt) {
+    const noteId = `note-${idx}`;
+    html += `<span class="ex-note-toggle" onclick="toggleNote('${noteId}')">Show notes ▾</span>
+    <div class="ex-note" id="${noteId}">`;
+    if (ex.note) html += `${ex.note}`;
+    if (ex.alt) html += `<br><span style="color:var(--dim)">Alt: ${ex.alt}</span>`;
+    html += `</div>`;
+  }
+
+  if (ex.prog) html += `<div class="prog-tip">${ex.prog}</div>`;
+
+  // Log area (hidden until session starts)
+  html += `<div class="log-area" id="log-${idx}" style="display:none">
+    <div id="sets-${idx}"></div>
+    <span class="log-add-set" onclick="addSet(${idx})">+ Add set</span>
+  </div>`;
+
+  html += `</div>`;
+  return html;
+}
+
+function toggleNote(id) {
+  const el = document.getElementById(id);
+  const toggle = el.previousElementSibling;
+  const open = el.classList.toggle('open');
+  toggle.textContent = open ? 'Hide notes ▴' : 'Show notes ▾';
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SESSION
+══════════════════════════════════════════════════════════════════════════ */
+function startSession() {
+  sessionActive = true;
+  sessionStart = Date.now();
+
+  // Show log areas
+  Object.keys(setData).forEach(idx => {
+    const la = document.getElementById('log-' + idx);
+    if (la) { la.style.display = 'block'; renderSets(parseInt(idx)); }
+  });
+
+  // Show timer + finish button
+  document.getElementById('timer-bar').style.display = 'flex';
+  startTimer();
+
+  // Replace start btn with scroll hint
+  const btn = document.querySelector('.start-btn');
+  if (btn) btn.style.display = 'none';
+}
+
+function renderSets(idx) {
+  const container = document.getElementById('sets-' + idx);
+  if (!container) return;
+  const sets = setData[idx].sets;
+  container.innerHTML = sets.map((s, i) => `
+    <div class="log-row" id="set-${idx}-${i}">
+      <span class="log-set-num">${i + 1}</span>
+      <input class="log-input" type="number" inputmode="decimal" placeholder="kg" value="${s.kg}"
+        onchange="updateSet(${idx},${i},'kg',this.value)" style="max-width:64px">
+      <span class="log-x">×</span>
+      <input class="log-input" type="number" inputmode="numeric" placeholder="reps" value="${s.reps}"
+        onchange="updateSet(${idx},${i},'reps',this.value)">
+      <button class="log-done-btn ${s.done ? 'done' : ''}" onclick="toggleDone(${idx},${i})">
+        ${s.done ? '✓' : 'Done'}
+      </button>
+    </div>`).join('');
+}
+
+function updateSet(idx, setIdx, field, val) {
+  setData[idx].sets[setIdx][field] = val;
+}
+
+function toggleDone(idx, setIdx) {
+  // Save current input values first
+  const kgInput = document.querySelector(`#set-${idx}-${setIdx} input[placeholder="kg"]`);
+  const repsInput = document.querySelector(`#set-${idx}-${setIdx} input[placeholder="reps"]`);
+  if (kgInput) setData[idx].sets[setIdx].kg = kgInput.value;
+  if (repsInput) setData[idx].sets[setIdx].reps = repsInput.value;
+
+  setData[idx].sets[setIdx].done = !setData[idx].sets[setIdx].done;
+  renderSets(idx);
+}
+
+function addSet(idx) {
+  // Save existing values before re-rendering
+  const existing = setData[idx].sets;
+  existing.forEach((s, i) => {
+    const kgInput = document.querySelector(`#set-${idx}-${i} input[placeholder="kg"]`);
+    const repsInput = document.querySelector(`#set-${idx}-${i} input[placeholder="reps"]`);
+    if (kgInput) s.kg = kgInput.value;
+    if (repsInput) s.reps = repsInput.value;
+  });
+  setData[idx].sets.push({ kg: '', reps: '', done: false });
+  renderSets(idx);
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+    const m = Math.floor(elapsed / 60);
+    const s = elapsed % 60;
+    document.getElementById('timer-val').textContent = `${m}:${s.toString().padStart(2, '0')}`;
+  }, 1000);
+}
+
+function stopTimer() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+}
+
+function finishSession() {
+  if (!confirm('Save this session?')) return;
+  stopTimer();
+
+  const elapsed = Math.floor((Date.now() - sessionStart) / 1000);
+  const mins = Math.floor(elapsed / 60);
+  const secs = elapsed % 60;
+  const duration = `${mins}m ${secs}s`;
+
+  // Collect logged data
+  const exercises = [];
+  const wkt = WORKOUTS[currentWorkoutId];
+  let exGlobalIdx = 0;
+  wkt.groups.forEach(g => {
+    g.exercises.forEach(ex => {
+      const idx = exGlobalIdx++;
+      const sets = (setData[idx] && setData[idx].sets) || [];
+      const doneSets = sets.filter(s => s.done && (s.kg || s.reps));
+      if (doneSets.length > 0) {
+        exercises.push({ name: ex.name, sets: doneSets });
+      }
+    });
+  });
+
+  const record = {
+    id: Date.now(),
+    workoutId: currentWorkoutId,
+    workoutName: wkt.name,
+    date: new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }),
+    duration,
+    exercises
+  };
+
+  const history = getHistory();
+  history.unshift(record);
+  localStorage.setItem('workout_history', JSON.stringify(history));
+
+  sessionActive = false;
+  showScreen('home');
+  alert(`Session saved! ${duration} · ${exercises.length} exercises logged.`);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HISTORY
+══════════════════════════════════════════════════════════════════════════ */
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem('workout_history')) || []; }
+  catch { return []; }
+}
+
+function renderHistory() {
+  const history = getHistory();
+  const content = document.getElementById('history-content');
+  if (history.length === 0) {
+    content.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">📋</div>
+      <div class="empty-state-text">No sessions yet.<br>Complete a workout to see your history here.</div>
+    </div><div class="nav-spacer"></div>`;
+    return;
+  }
+
+  let html = '';
+  history.forEach(record => {
+    const typeMap = { 'push-a': 'push', 'push-b': 'push', 'pull-a': 'pull', 'pull-b': 'pull', 'ant-1': 'ant', 'ant-2': 'ant', 'kb-power': 'kb' };
+    const type = typeMap[record.workoutId] || 'push';
+    const dotColor = { push: 'var(--push)', pull: 'var(--pull)', ant: 'var(--ant)', kb: 'var(--kb)' }[type];
+
+    html += `<div class="history-card">
+      <div class="history-header">
+        <div>
+          <div class="history-name" style="display:flex;align-items:center;gap:8px">
+            <span style="width:8px;height:8px;border-radius:50%;background:${dotColor};display:inline-block;flex-shrink:0"></span>
+            ${record.workoutName}
+          </div>
+          <div class="history-duration">${record.duration} · ${record.date}</div>
+        </div>
+      </div>`;
+
+    if (record.exercises && record.exercises.length > 0) {
+      html += `<div class="history-exercises">`;
+      record.exercises.forEach(ex => {
+        const setsStr = ex.sets.map(s => {
+          if (s.kg && s.reps) return `${s.kg}kg × ${s.reps}`;
+          if (s.reps) return `${s.reps} reps`;
+          return `${s.kg}kg`;
+        }).join(', ');
+        html += `<div class="history-ex-row"><strong>${ex.name}</strong> — ${setsStr}</div>`;
+      });
+      html += `</div>`;
+    } else {
+      html += `<div style="font-size:12px;color:var(--muted);margin-top:8px">No sets logged</div>`;
+    }
+
+    html += `<button class="history-delete" onclick="deleteRecord(${record.id})">Delete</button>`;
+    html += `</div>`;
+  });
+
+  html += `<div class="nav-spacer"></div>`;
+  content.innerHTML = html;
+}
+
+function deleteRecord(id) {
+  if (!confirm('Delete this session?')) return;
+  const history = getHistory().filter(r => r.id !== id);
+  localStorage.setItem('workout_history', JSON.stringify(history));
+  renderHistory();
+}
+
+function clearHistory() {
+  if (!confirm('Delete all sessions? This cannot be undone.')) return;
+  localStorage.removeItem('workout_history');
+  renderHistory();
+}
+</script>
+</body>
+</html>
