@@ -292,6 +292,23 @@
   .upgrade-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
   .upgrade-body strong { color: #ccc; }
 
+  /* ── LAST SESSION ── */
+  .last-session-banner {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-left: 3px solid var(--pull);
+    border-radius: var(--radius); padding: 10px 14px;
+    margin-bottom: 12px;
+  }
+  .last-session-icon { font-size: 18px; color: var(--pull); flex-shrink: 0; }
+  .last-session-title { font-size: 13px; font-weight: 600; color: var(--pull); }
+  .last-session-sub { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+  .ex-prev {
+    font-size: 11px; color: var(--muted);
+    margin-top: 4px; letter-spacing: 0.01em;
+  }
+
   /* ── MISC ── */
   .prog-tip {
     font-size: 11px; color: #5588cc; padding: 6px 14px 8px;
@@ -659,11 +676,47 @@ function goHome() {
 /* ══════════════════════════════════════════════════════════════════════════
    WORKOUT VIEW
 ══════════════════════════════════════════════════════════════════════════ */
+
+// Returns { map: { exerciseName -> [{kg,reps}] }, date, duration }
+// from the most recent saved session for this workoutId, or null.
+function getLastSession(workoutId) {
+  const history = getHistory();
+  const last = history.find(r => r.workoutId === workoutId);
+  if (!last || !last.exercises || last.exercises.length === 0) return null;
+  const map = {};
+  last.exercises.forEach(ex => { map[ex.name] = ex.sets; });
+  return { map, date: last.date, duration: last.duration };
+}
+
+let lastSessionData = null; // holds last session info while building workout HTML
+
 function openWorkout(id) {
   currentWorkoutId = id;
   sessionActive = false;
   setData = {};
+
   const wkt = WORKOUTS[id];
+
+  // Look up last session for this workout
+  lastSessionData = getLastSession(id);
+
+  // Pre-populate setData from last session where available
+  let exIdx = 0;
+  wkt.groups.forEach(group => {
+    group.exercises.forEach(ex => {
+      if (lastSessionData && lastSessionData.map[ex.name]) {
+        setData[exIdx] = {
+          sets: lastSessionData.map[ex.name].map(s => ({
+            kg: s.kg || '', reps: s.reps || '', done: false
+          }))
+        };
+      } else {
+        setData[exIdx] = { sets: [{ kg: '', reps: '', done: false }] };
+      }
+      exIdx++;
+    });
+  });
+
   document.getElementById('wkt-title').textContent = wkt.name;
   document.getElementById('wkt-sub').textContent = wkt.sub;
   document.getElementById('timer-bar').style.display = 'none';
@@ -676,6 +729,17 @@ function openWorkout(id) {
 function buildWorkoutHTML(wkt) {
   let html = '';
   const typeColor = { push: 'var(--push)', pull: 'var(--pull)', ant: 'var(--ant)', kb: 'var(--kb)' }[wkt.type];
+
+  // Last session banner
+  if (lastSessionData) {
+    html += `<div class="last-session-banner">
+      <span class="last-session-icon">↩</span>
+      <div>
+        <div class="last-session-title">Last session loaded</div>
+        <div class="last-session-sub">${lastSessionData.date} · ${lastSessionData.duration}</div>
+      </div>
+    </div>`;
+  }
 
   // Info box
   if (wkt.info) {
@@ -731,11 +795,28 @@ function buildWorkoutHTML(wkt) {
 
 function buildExCard(ex, idx, typeColor, isAnt) {
   const bg = isAnt ? 'background:var(--ant-bg);border-color:#3a2a60' : '';
+
+  // Build previous sets summary string if available
+  let prevHtml = '';
+  if (lastSessionData && lastSessionData.map[ex.name]) {
+    const prevSets = lastSessionData.map[ex.name];
+    const summary = prevSets.map(s => {
+      if (s.kg && s.reps) return `${s.kg}kg×${s.reps}`;
+      if (s.reps) return `${s.reps} reps`;
+      if (s.kg) return `${s.kg}kg`;
+      return null;
+    }).filter(Boolean).join('  ·  ');
+    if (summary) {
+      prevHtml = `<div class="ex-prev">↩ ${summary}</div>`;
+    }
+  }
+
   let html = `<div class="ex-card" id="excard-${idx}" style="${bg}">
     <div class="ex-header">
       <div style="flex:1">
         <div class="ex-name">${ex.name}</div>
         <div class="ex-muscle">${ex.muscle}</div>
+        ${prevHtml}
       </div>
       <div class="ex-scheme" style="color:${typeColor}">${ex.scheme}</div>
     </div>`;
