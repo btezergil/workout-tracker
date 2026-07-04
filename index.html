@@ -30,6 +30,8 @@
     --ant-bg: #1a1030;
     --kb: #f97316;
     --kb-bg: #2b1500;
+    --ab: #f472b6;
+    --ab-bg: #2b0a1a;
     --warn: #facc15;
     --warn-bg: #2b2000;
     --radius: 10px;
@@ -117,6 +119,7 @@
   .badge-pull { background: var(--pull-bg); color: var(--pull); }
   .badge-ant  { background: var(--ant-bg);  color: var(--ant);  }
   .badge-kb   { background: var(--kb-bg);   color: var(--kb);   }
+  .badge-ab   { background: var(--ab-bg);   color: var(--ab);   }
 
   /* ── SECTION LABELS ── */
   .section-label {
@@ -282,6 +285,65 @@
   .emom-row-rep { color: var(--kb); font-weight: 600; }
   .emom-note { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
 
+  /* ── AMRAP BLOCK ── */
+  .amrap-block {
+    background: var(--ab-bg); border: 1px solid #5a1a3a;
+    border-radius: var(--radius); padding: 12px 14px; margin-bottom: 12px;
+  }
+  .amrap-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .amrap-title { font-size: 13px; font-weight: 600; color: var(--ab); }
+  .amrap-duration { font-size: 12px; color: var(--muted); }
+  .amrap-desc { font-size: 12px; color: #bbb; line-height: 1.6; }
+
+  /* ── AMRAP COUNTDOWN TIMER ── */
+  .amrap-timer-wrap {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px; margin-bottom: 12px; text-align: center;
+  }
+  .amrap-timer-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .amrap-timer-display {
+    font-size: 52px; font-weight: 700; letter-spacing: -1px;
+    font-variant-numeric: tabular-nums; color: var(--ab);
+    line-height: 1;
+  }
+  .amrap-timer-display.warning { color: var(--warn); }
+  .amrap-timer-display.done { color: var(--pull); }
+  .amrap-rounds { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .amrap-rounds span { color: var(--text); font-weight: 600; }
+  .amrap-btn-row { display: flex; gap: 8px; margin-top: 10px; }
+  .amrap-btn {
+    flex: 1; padding: 11px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface3);
+    color: var(--text); font-size: 14px; font-weight: 500; cursor: pointer;
+  }
+  .amrap-btn.primary { background: var(--ab); border-color: var(--ab); color: #fff; }
+  .amrap-btn:active { opacity: 0.8; }
+
+  /* ── HOLD TIMER ── */
+  .hold-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px;
+  }
+  .hold-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .hold-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .hold-scheme { font-size: 13px; color: var(--ab); font-weight: 500; }
+  .hold-muscle { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .hold-note { font-size: 12px; color: #aaa; line-height: 1.5; margin-bottom: 8px; }
+  .hold-timer-row { display: flex; align-items: center; gap: 8px; }
+  .hold-countdown {
+    font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums;
+    color: var(--ab); min-width: 64px;
+  }
+  .hold-countdown.warning { color: var(--warn); }
+  .hold-countdown.done { color: var(--pull); }
+  .hold-start-btn {
+    flex: 1; padding: 9px; border-radius: var(--radius-sm);
+    background: var(--ab); border: none; color: #fff;
+    font-size: 14px; font-weight: 500; cursor: pointer;
+  }
+  .hold-start-btn.running { background: var(--surface3); border: 1px solid var(--border); color: var(--muted); }
+  .hold-sets-done { font-size: 12px; color: var(--muted); text-align: right; }
+
   /* ── UPGRADE BOX ── */
   .upgrade-box {
     background: var(--surface2); border: 1px solid var(--border);
@@ -400,6 +462,17 @@
       <div class="split-info">
         <div class="split-name">KB Power <span class="badge badge-kb">Power</span></div>
         <div class="split-meta">Swings · cleans · snatches · EMOM</div>
+      </div>
+      <div class="split-arrow">›</div>
+    </div>
+
+    <div class="section-label">Core</div>
+
+    <div class="split-card" onclick="openWorkout('ab-circuit')">
+      <div class="split-dot" style="background:var(--ab)"></div>
+      <div class="split-info">
+        <div class="split-name">AB Circuit <span class="badge badge-ab">Core</span></div>
+        <div class="split-meta">15 min AMRAP · KB + bodyweight finisher</div>
       </div>
       <div class="split-arrow">›</div>
     </div>
@@ -643,6 +716,43 @@ const WORKOUTS = {
       }
     ],
     upgrade: 'Your 20kg KB is excellent for swings and cleans. 8kg is perfect for snatch learning.\n\n16kg kettlebell — bridges snatch progression between 8kg and 20kg. Most people struggle jumping straight from 8 to 20kg on the snatch.\n\n24kg kettlebell — natural next step for swings and cleans when 20kg gets easy.'
+  },
+
+  'ab-circuit': {
+    id: 'ab-circuit', name: 'AB Circuit', type: 'ab',
+    sub: 'Core conditioning · ~20–25 min total',
+    info: 'Two parts: a 15-minute AMRAP of 4 KB exercises (as many rounds as possible), then a bodyweight finisher of dead bugs + hollow body hold. The AMRAP trains core endurance and rotation under fatigue; the finisher trains deep stabilisation when you\'re already tired — which is exactly when it\'s hardest and most effective.',
+    amrap: {
+      minutes: 15,
+      rounds: [
+        { name: 'Horizontal swing', reps: '10 reps', note: 'Hold KB with both hands, swing it laterally side to side across your body at waist height. Obliques resist the rotation on every rep — don\'t let your hips twist.' },
+        { name: 'Around the world', reps: '20 reps (10 each dir.)', note: 'Pass the KB around your body in a full circle, alternating direction each set of 10. Keep your core braced and feet planted — the goal is smooth, controlled circles, not speed.' },
+        { name: 'Elbow uppercut', reps: '10 reps each side', note: 'Hold KB at chest, drive your elbow upward in a diagonal punching arc across your body. This is a rotation exercise — your obliques are doing the driving, not your arm. Stay controlled.' },
+        { name: 'Kneeling wood chop', reps: '6 reps each side', note: 'Kneel on one knee, hold KB with both hands. Chop diagonally from high outside one shoulder down across your body to the opposite hip. Kneeling removes your legs from the movement — your core can\'t cheat.' }
+      ]
+    },
+    groups: [
+      {
+        label: 'Finisher — deep stabilisation',
+        exercises: [
+          {
+            name: 'Dead bug',
+            scheme: '3 × 8 each side',
+            muscle: 'Transverse abdominis, deep core stabilisers',
+            note: 'Lie on your back, arms pointing to ceiling, knees at 90° in the air. Simultaneously lower your right arm behind your head and extend your left leg toward the floor — keep your lower back PRESSED flat into the floor the entire time. Return and switch sides. If your back arches, you\'ve gone too far. This is about control, not range of motion.',
+            holdTimer: null
+          },
+          {
+            name: 'Hollow body hold',
+            scheme: '3 × max hold (target 20–45s)',
+            muscle: 'Entire anterior core, hip flexors, full-body tension',
+            note: 'Lie on your back. Press your lower back flat into the floor, raise shoulders off the ground, extend arms overhead and legs out low (the lower, the harder). Your body forms a shallow dish shape. Hold without letting your back leave the floor. If you lose the position, bend your knees to make it easier rather than arching your back. This is the same position gymnasts maintain on the rings — deceptively brutal.',
+            holdTimer: true,
+            holdSeconds: 45
+          }
+        ]
+      }
+    ]
   }
 };
 
@@ -697,6 +807,12 @@ function openWorkout(id) {
 
   const wkt = WORKOUTS[id];
 
+  // Reset AMRAP timer state
+  clearInterval(amrapInterval);
+  amrapRunning = false;
+  amrapSecondsLeft = 15 * 60;
+  amrapRounds = 0;
+
   // Look up last session for this workout
   lastSessionData = getLastSession(id);
 
@@ -728,7 +844,7 @@ function openWorkout(id) {
 
 function buildWorkoutHTML(wkt) {
   let html = '';
-  const typeColor = { push: 'var(--push)', pull: 'var(--pull)', ant: 'var(--ant)', kb: 'var(--kb)' }[wkt.type];
+  const typeColor = { push: 'var(--push)', pull: 'var(--pull)', ant: 'var(--ant)', kb: 'var(--kb)', ab: 'var(--ab)' }[wkt.type];
 
   // Last session banner
   if (lastSessionData) {
@@ -744,6 +860,45 @@ function buildWorkoutHTML(wkt) {
   // Info box
   if (wkt.info) {
     html += `<div class="info-box"><div class="info-box-title">How this works</div><div class="info-box-body">${wkt.info}</div></div>`;
+  }
+
+  // AMRAP block (ab circuit)
+  if (wkt.amrap) {
+    const a = wkt.amrap;
+    html += `<div class="amrap-block">
+      <div class="amrap-header">
+        <span class="amrap-title">AMRAP — ${a.minutes} minutes</span>
+        <span class="amrap-duration">As many rounds as possible</span>
+      </div>
+      <div class="amrap-desc">Complete the following exercises in order, cycling continuously for 15 minutes. Count your completed rounds.</div>
+    </div>`;
+
+    // Round exercises listed as reference cards
+    a.rounds.forEach((r, i) => {
+      html += `<div class="ex-card">
+        <div class="ex-header">
+          <div style="flex:1">
+            <div class="ex-name">${r.name}</div>
+            <div class="ex-muscle" style="color:var(--ab);font-weight:500">${r.reps}</div>
+          </div>
+          <div style="font-size:22px;font-weight:700;color:var(--ab);opacity:0.35">${i+1}</div>
+        </div>
+        <span class="ex-note-toggle" onclick="toggleNote('amrap-note-${i}')">Show notes ▾</span>
+        <div class="ex-note" id="amrap-note-${i}">${r.note}</div>
+      </div>`;
+    });
+
+    // AMRAP countdown timer widget
+    html += `<div class="amrap-timer-wrap" id="amrap-timer-wrap">
+      <div class="amrap-timer-label">AMRAP Timer</div>
+      <div class="amrap-timer-display" id="amrap-display">15:00</div>
+      <div class="amrap-rounds">Rounds completed: <span id="amrap-rounds">0</span></div>
+      <div class="amrap-btn-row">
+        <button class="amrap-btn" onclick="amrapRound()">+ Round</button>
+        <button class="amrap-btn primary" id="amrap-start-btn" onclick="toggleAmrap()">Start</button>
+        <button class="amrap-btn" onclick="resetAmrap()">Reset</button>
+      </div>
+    </div>`;
   }
 
   // Skill ladder (KB)
@@ -832,11 +987,25 @@ function buildExCard(ex, idx, typeColor, isAnt) {
 
   if (ex.prog) html += `<div class="prog-tip">${ex.prog}</div>`;
 
-  // Log area (hidden until session starts)
-  html += `<div class="log-area" id="log-${idx}" style="display:none">
-    <div id="sets-${idx}"></div>
-    <span class="log-add-set" onclick="addSet(${idx})">+ Add set</span>
-  </div>`;
+  // Hold timer (for hollow body / isometric exercises)
+  if (ex.holdTimer) {
+    const secs = ex.holdSeconds || 30;
+    html += `<div class="log-area" id="log-${idx}" style="display:none">
+      <div style="padding:8px 0 4px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Sets completed: <span id="hold-done-${idx}" style="color:var(--text);font-weight:600">0 / 3</span></div>
+        <div class="hold-timer-row">
+          <div class="hold-countdown" id="hold-cd-${idx}">${secs}s</div>
+          <button class="hold-start-btn" id="hold-btn-${idx}" onclick="toggleHold(${idx}, ${secs})">Hold</button>
+        </div>
+      </div>
+    </div>`;
+  } else {
+    // Standard log area
+    html += `<div class="log-area" id="log-${idx}" style="display:none">
+      <div id="sets-${idx}"></div>
+      <span class="log-add-set" onclick="addSet(${idx})">+ Add set</span>
+    </div>`;
+  }
 
   html += `</div>`;
   return html;
@@ -859,7 +1028,10 @@ function startSession() {
   // Show log areas
   Object.keys(setData).forEach(idx => {
     const la = document.getElementById('log-' + idx);
-    if (la) { la.style.display = 'block'; renderSets(parseInt(idx)); }
+    if (!la) return;
+    la.style.display = 'block';
+    // Only call renderSets if this is a standard set-based log (has a sets container)
+    if (document.getElementById('sets-' + idx)) renderSets(parseInt(idx));
   });
 
   // Show timer + finish button
@@ -994,9 +1166,9 @@ function renderHistory() {
 
   let html = '';
   history.forEach(record => {
-    const typeMap = { 'push-a': 'push', 'push-b': 'push', 'pull-a': 'pull', 'pull-b': 'pull', 'ant-1': 'ant', 'ant-2': 'ant', 'kb-power': 'kb' };
+    const typeMap = { 'push-a': 'push', 'push-b': 'push', 'pull-a': 'pull', 'pull-b': 'pull', 'ant-1': 'ant', 'ant-2': 'ant', 'kb-power': 'kb', 'ab-circuit': 'ab' };
     const type = typeMap[record.workoutId] || 'push';
-    const dotColor = { push: 'var(--push)', pull: 'var(--pull)', ant: 'var(--ant)', kb: 'var(--kb)' }[type];
+    const dotColor = { push: 'var(--push)', pull: 'var(--pull)', ant: 'var(--ant)', kb: 'var(--kb)', ab: 'var(--ab)' }[type];
 
     html += `<div class="history-card">
       <div class="history-header">
@@ -1043,6 +1215,123 @@ function clearHistory() {
   if (!confirm('Delete all sessions? This cannot be undone.')) return;
   localStorage.removeItem('workout_history');
   renderHistory();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   AMRAP TIMER
+══════════════════════════════════════════════════════════════════════════ */
+let amrapInterval = null;
+let amrapRunning = false;
+let amrapSecondsLeft = 15 * 60;
+let amrapRounds = 0;
+
+function toggleAmrap() {
+  if (amrapRunning) {
+    clearInterval(amrapInterval);
+    amrapRunning = false;
+    document.getElementById('amrap-start-btn').textContent = 'Resume';
+    document.getElementById('amrap-start-btn').className = 'amrap-btn primary';
+  } else {
+    if (amrapSecondsLeft <= 0) return;
+    amrapRunning = true;
+    document.getElementById('amrap-start-btn').textContent = 'Pause';
+    amrapInterval = setInterval(() => {
+      amrapSecondsLeft--;
+      updateAmrapDisplay();
+      if (amrapSecondsLeft <= 0) {
+        clearInterval(amrapInterval);
+        amrapRunning = false;
+        document.getElementById('amrap-start-btn').textContent = 'Done!';
+        document.getElementById('amrap-display').classList.add('done');
+      }
+    }, 1000);
+  }
+}
+
+function amrapRound() {
+  amrapRounds++;
+  const el = document.getElementById('amrap-rounds');
+  if (el) el.textContent = amrapRounds;
+}
+
+function resetAmrap() {
+  clearInterval(amrapInterval);
+  amrapRunning = false;
+  amrapSecondsLeft = 15 * 60;
+  amrapRounds = 0;
+  const display = document.getElementById('amrap-display');
+  const rounds = document.getElementById('amrap-rounds');
+  const btn = document.getElementById('amrap-start-btn');
+  if (display) { display.textContent = '15:00'; display.className = 'amrap-timer-display'; }
+  if (rounds) rounds.textContent = '0';
+  if (btn) { btn.textContent = 'Start'; btn.className = 'amrap-btn primary'; }
+}
+
+function updateAmrapDisplay() {
+  const m = Math.floor(amrapSecondsLeft / 60);
+  const s = amrapSecondsLeft % 60;
+  const display = document.getElementById('amrap-display');
+  if (!display) return;
+  display.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  display.className = 'amrap-timer-display' + (amrapSecondsLeft <= 60 ? ' warning' : '');
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HOLD TIMER (dead bug / hollow body)
+══════════════════════════════════════════════════════════════════════════ */
+const holdState = {}; // { idx: { interval, running, secondsLeft, setsCompleted, totalSets } }
+
+function toggleHold(idx, totalSeconds) {
+  if (!holdState[idx]) {
+    holdState[idx] = { interval: null, running: false, secondsLeft: totalSeconds, setsCompleted: 0, totalSets: 3 };
+  }
+  const state = holdState[idx];
+  const cd = document.getElementById(`hold-cd-${idx}`);
+  const btn = document.getElementById(`hold-btn-${idx}`);
+
+  if (state.running) {
+    // Pause
+    clearInterval(state.interval);
+    state.running = false;
+    btn.textContent = 'Resume';
+    btn.className = 'hold-start-btn';
+  } else {
+    if (state.secondsLeft <= 0) {
+      // Set complete — move to next
+      state.setsCompleted++;
+      state.secondsLeft = totalSeconds;
+      const doneEl = document.getElementById(`hold-done-${idx}`);
+      if (doneEl) doneEl.textContent = `${state.setsCompleted} / ${state.totalSets}`;
+      if (state.setsCompleted >= state.totalSets) {
+        cd.textContent = 'Done!';
+        cd.className = 'hold-countdown done';
+        btn.textContent = '✓ All sets';
+        btn.className = 'hold-start-btn running';
+        return;
+      }
+      cd.textContent = `${totalSeconds}s`;
+      cd.className = 'hold-countdown';
+      btn.textContent = 'Hold';
+      return;
+    }
+    // Start / resume
+    state.running = true;
+    btn.textContent = 'Running…';
+    btn.className = 'hold-start-btn running';
+    state.interval = setInterval(() => {
+      state.secondsLeft--;
+      cd.textContent = `${state.secondsLeft}s`;
+      cd.className = 'hold-countdown' + (state.secondsLeft <= 10 ? ' warning' : '');
+      if (state.secondsLeft <= 0) {
+        clearInterval(state.interval);
+        state.running = false;
+        cd.textContent = '0s ✓';
+        cd.className = 'hold-countdown done';
+        btn.textContent = 'Next set';
+        btn.className = 'hold-start-btn';
+      }
+    }, 1000);
+  }
 }
 
 // Register service worker for PWA offline support
