@@ -32,6 +32,8 @@
     --kb-bg: #2b1500;
     --ab: #f472b6;
     --ab-bg: #2b0a1a;
+    --band: #22d3ee;
+    --band-bg: #002a30;
     --warn: #facc15;
     --warn-bg: #2b2000;
     --radius: 10px;
@@ -120,6 +122,7 @@
   .badge-ant  { background: var(--ant-bg);  color: var(--ant);  }
   .badge-kb   { background: var(--kb-bg);   color: var(--kb);   }
   .badge-ab   { background: var(--ab-bg);   color: var(--ab);   }
+  .badge-band { background: var(--band-bg); color: var(--band); }
 
   /* ── SECTION LABELS ── */
   .section-label {
@@ -319,30 +322,28 @@
   .amrap-btn.primary { background: var(--ab); border-color: var(--ab); color: #fff; }
   .amrap-btn:active { opacity: 0.8; }
 
-  /* ── HOLD TIMER ── */
-  .hold-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: var(--radius); padding: 12px 14px; margin-bottom: 8px;
+  /* ── HOLD TIMER (full centred, matches AMRAP style) ── */
+  .hold-timer-wrap {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px; margin-top: 0; text-align: center;
   }
-  .hold-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-  .hold-name { font-size: 14px; font-weight: 600; color: var(--text); }
-  .hold-scheme { font-size: 13px; color: var(--ab); font-weight: 500; }
-  .hold-muscle { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
-  .hold-note { font-size: 12px; color: #aaa; line-height: 1.5; margin-bottom: 8px; }
-  .hold-timer-row { display: flex; align-items: center; gap: 8px; }
-  .hold-countdown {
-    font-size: 28px; font-weight: 700; font-variant-numeric: tabular-nums;
-    color: var(--ab); min-width: 64px;
+  .hold-timer-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+  .hold-timer-display {
+    font-size: 52px; font-weight: 700; letter-spacing: -1px;
+    font-variant-numeric: tabular-nums; color: var(--ab); line-height: 1;
   }
-  .hold-countdown.warning { color: var(--warn); }
-  .hold-countdown.done { color: var(--pull); }
-  .hold-start-btn {
-    flex: 1; padding: 9px; border-radius: var(--radius-sm);
-    background: var(--ab); border: none; color: #fff;
-    font-size: 14px; font-weight: 500; cursor: pointer;
+  .hold-timer-display.warning { color: var(--warn); }
+  .hold-timer-display.done { color: var(--pull); }
+  .hold-sets-info { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .hold-sets-info span { color: var(--text); font-weight: 600; }
+  .hold-btn-row { display: flex; gap: 8px; margin-top: 10px; }
+  .hold-btn {
+    flex: 1; padding: 11px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface3);
+    color: var(--text); font-size: 14px; font-weight: 500; cursor: pointer;
   }
-  .hold-start-btn.running { background: var(--surface3); border: 1px solid var(--border); color: var(--muted); }
-  .hold-sets-done { font-size: 12px; color: var(--muted); text-align: right; }
+  .hold-btn.primary { background: var(--ab); border-color: var(--ab); color: #fff; }
+  .hold-btn:active { opacity: 0.8; }
 
   /* ── UPGRADE BOX ── */
   .upgrade-box {
@@ -473,6 +474,26 @@
       <div class="split-info">
         <div class="split-name">AB Circuit <span class="badge badge-ab">Core</span></div>
         <div class="split-meta">15 min AMRAP · KB + bodyweight finisher</div>
+      </div>
+      <div class="split-arrow">›</div>
+    </div>
+
+    <div class="section-label">Travel — bands only</div>
+
+    <div class="split-card" onclick="openWorkout('band-push')">
+      <div class="split-dot" style="background:var(--band)"></div>
+      <div class="split-info">
+        <div class="split-name">Band Push <span class="badge badge-band">Travel</span></div>
+        <div class="split-meta">Chest · shoulders · triceps · no anchor needed</div>
+      </div>
+      <div class="split-arrow">›</div>
+    </div>
+
+    <div class="split-card" onclick="openWorkout('band-pull')">
+      <div class="split-dot" style="background:var(--band)"></div>
+      <div class="split-info">
+        <div class="split-name">Band Pull <span class="badge badge-band">Travel</span></div>
+        <div class="split-meta">Back · biceps · rear delts · door anchor</div>
       </div>
       <div class="split-arrow">›</div>
     </div>
@@ -753,6 +774,116 @@ const WORKOUTS = {
         ]
       }
     ]
+  },
+
+  'band-push': {
+    id: 'band-push', name: 'Band Push', type: 'band',
+    sub: 'Chest · shoulders · triceps · ~40 min',
+    info: 'All exercises use your door anchor. Anchor height changes the exercise — chest height for pressing, high (top of door) for flies and tricep pushdowns. Three bands: light for isolation and laterals, medium for pressing, heavy or doubled for your main compound. Increase resistance by stepping further from the door. Slow 3s eccentrics matter here — bands lose tension at the bottom so controlling the return is what keeps muscles loaded throughout.',
+    groups: [{
+      label: null,
+      exercises: [
+        {
+          name: 'Band chest press (anchor at chest height)',
+          scheme: '4 × 10–12',
+          muscle: 'Pecs, anterior delts, triceps',
+          note: 'Anchor at chest height behind you. Hold one end in each hand, step forward until there\'s tension, stagger your stance for balance. Press both hands forward and slightly together — finish with palms almost touching, squeezing the pecs hard. Step further from the door to increase resistance. This is your main chest compound, the band equivalent of a cable press.',
+          prog: 'Stack two bands or step further back for more resistance. Bring hands closer together at the finish for more inner pec activation.'
+        },
+        {
+          name: 'Band push-up (band across back)',
+          scheme: '3 × 10–15',
+          muscle: 'Pecs, anterior delts, triceps',
+          note: 'Loop a medium/heavy band across your upper back, holding each end under your palms. The band loads the top of the push-up where bodyweight alone is easiest. Keep elbows ~45° from torso. Pairs well with the press above — different angle on the same muscles.',
+          prog: 'Heavier band or stack two when this gets easy. Elevate feet to shift load to upper chest.'
+        },
+        {
+          name: 'Band overhead press (anchor at chest height)',
+          scheme: '3 × 12–15',
+          muscle: 'All deltoid heads, triceps',
+          note: 'Anchor at chest height behind you, same setup as the press. Hold ends at shoulder height and press straight overhead. The anchor pulling back challenges your core to stay upright throughout — more demanding than a foot-anchor press. Use medium band.',
+          prog: 'Step further from door to increase load. Narrow stance for more core challenge.'
+        },
+        {
+          name: 'Band lateral raise (anchor at low height, side-on)',
+          scheme: '3 × 15–20 each side',
+          muscle: 'Lateral delts',
+          note: 'Anchor low on the door. Stand side-on to the door, hold the band with the hand furthest from the anchor, raise out to shoulder height. The low anchor creates constant tension through the full arc — better than foot-anchor since the pull angle matches the movement perfectly. Light band. Switch sides.',
+          alt: 'Both arms: anchor at centre-low, face away from door, raise both arms simultaneously.'
+        },
+        {
+          name: 'Band high-to-low fly (anchor at top of door)',
+          scheme: '3 × 12–15',
+          muscle: 'Pecs (lower fibres), stretch focus',
+          note: 'Anchor at the very top of the door. Face away, hold one end in each hand with arms wide and high. Bring arms forward and DOWN in a fly arc to hip level, squeezing pecs at the bottom. This is a proper cable crossover — upper anchor gives the pec a full stretch at the start that you can\'t get with dumbbells.',
+          alt: 'Anchor at mid-height for a flat fly — arms sweep forward at chest level instead.'
+        },
+        {
+          name: 'Band tricep pushdown (anchor at top of door)',
+          scheme: '3 × 15–18',
+          muscle: 'Triceps (all heads)',
+          note: 'Anchor high on door. Face the door, elbows pinned at sides, push the band down to full extension and squeeze hard at the bottom. Far superior to foot-anchor version — the high anchor keeps constant tension through the entire range of motion, just like a cable pushdown at a gym.',
+          alt: 'Rope-style: hold one end in each hand with thumbs up, push down and flare wrists outward at the bottom for maximum tricep squeeze.'
+        }
+      ]
+    }]
+  },
+
+  'band-pull': {
+    id: 'band-pull', name: 'Band Pull', type: 'band',
+    sub: 'Back · biceps · rear delts · ~40 min',
+    info: 'Your door anchor turns any door into a full cable station. Anchor height is everything: top for lat pulldowns, chest height for rows and face pulls, low for low-to-high movements. Always anchor on the hinge side of a closed door — your pull tightens it into the frame. Give it one sharp test tug before each set. Three bands: light for rear delts and curls, medium for rows, heavy (or doubled) for pulldowns.',
+    groups: [{
+      label: null,
+      exercises: [
+        {
+          name: 'Band lat pulldown (anchor at top of door)',
+          scheme: '4 × 12–15',
+          muscle: 'Lats, teres major, biceps',
+          note: 'Anchor at the very top of the door. Kneel or sit facing the door, arms extended overhead holding the band. Pull elbows down and back toward your hips — not toward your shoulders. Squeeze lats hard at the bottom and hold 1s. Heavy band or stack two. This is your main width builder.',
+          prog: 'Stack two bands. Lean back slightly as you pull for more lat engagement — mimics a cable pulldown exactly.'
+        },
+        {
+          name: 'Band standing row (anchor at waist height)',
+          scheme: '4 × 12–15',
+          muscle: 'Lats, rhomboids, mid-back, biceps',
+          note: 'Anchor at waist height. Face the door, hinge forward ~30°, grip one end in each hand. Row both hands toward your lower ribs, driving elbows back and squeezing shoulder blades together at the end. Step back from the door to increase resistance. Medium or heavy band.',
+          prog: 'Step further from door. Pause 1s at full contraction for more mid-back activation.'
+        },
+        {
+          name: 'Band single-arm row (anchor at waist height)',
+          scheme: '3 × 10–12 each side',
+          muscle: 'Lats, rhomboids, rear delt, biceps',
+          note: 'Same anchor as the bilateral row. Row one arm back toward hip, rotating torso slightly at the top. Free hand braced on thigh. Single arm lets you really feel the lat — hold 1s at the end position every rep. Medium or heavy band.',
+          prog: 'Step further from door, or use a heavier band. Try a slight torso rotation at the top to add rhomboid squeeze.'
+        },
+        {
+          name: 'Band face pull (anchor at face height)',
+          scheme: '3 × 15–20',
+          muscle: 'Rear delts, external rotators, upper traps',
+          note: 'Anchor at face height. Step back until there\'s tension, pull toward your nose with elbows high and wide, hands finishing beside your ears. Rotate your knuckles back at the end — this is what activates the external rotators. Light band. Non-negotiable for shoulder health if you press a lot.',
+        },
+        {
+          name: 'Band pull-apart',
+          scheme: '3 × 20',
+          muscle: 'Rear delts, rhomboids, external rotators',
+          note: 'No anchor needed. Hold band in front at shoulder height with both hands, arms straight. Pull apart to a T shape. Superset this with face pulls for maximum rear delt volume. Light band.',
+        },
+        {
+          name: 'Band bicep curl (anchor at low height)',
+          scheme: '3 × 12–15',
+          muscle: 'Biceps brachii',
+          note: 'Anchor low on door. Face the door, hold one end in each hand, step back for tension. Curl both hands up, supinating (rotating palms up) as you go. The low anchor keeps the band pulling down through the full curl — constant tension the whole way unlike a foot anchor where the angle goes slack. Light to medium band.',
+          alt: 'Single arm: hold with one hand only. Lets you concentrate on each arm and feel the peak contraction more cleanly.'
+        },
+        {
+          name: 'Band hammer curl (anchor at low height)',
+          scheme: '2 × 15',
+          muscle: 'Brachialis, brachioradialis',
+          note: 'Same low anchor as the curl but keep palms facing each other (neutral grip) throughout. The low anchor works perfectly here — the constant downward pull makes neutral-grip curls feel much more loaded than a foot-anchor version. Adds arm thickness the regular curl misses.'
+        }
+      ]
+    }]
   }
 };
 
@@ -844,7 +975,7 @@ function openWorkout(id) {
 
 function buildWorkoutHTML(wkt) {
   let html = '';
-  const typeColor = { push: 'var(--push)', pull: 'var(--pull)', ant: 'var(--ant)', kb: 'var(--kb)', ab: 'var(--ab)' }[wkt.type];
+  const typeColor = { push: 'var(--push)', pull: 'var(--pull)', ant: 'var(--ant)', kb: 'var(--kb)', ab: 'var(--ab)', band: 'var(--band)' }[wkt.type];
 
   // Last session banner
   if (lastSessionData) {
@@ -987,15 +1118,17 @@ function buildExCard(ex, idx, typeColor, isAnt) {
 
   if (ex.prog) html += `<div class="prog-tip">${ex.prog}</div>`;
 
-  // Hold timer (for hollow body / isometric exercises)
+  // Hold timer (for hollow body / isometric exercises) — full centred display
   if (ex.holdTimer) {
     const secs = ex.holdSeconds || 30;
     html += `<div class="log-area" id="log-${idx}" style="display:none">
-      <div style="padding:8px 0 4px">
-        <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Sets completed: <span id="hold-done-${idx}" style="color:var(--text);font-weight:600">0 / 3</span></div>
-        <div class="hold-timer-row">
-          <div class="hold-countdown" id="hold-cd-${idx}">${secs}s</div>
-          <button class="hold-start-btn" id="hold-btn-${idx}" onclick="toggleHold(${idx}, ${secs})">Hold</button>
+      <div class="hold-timer-wrap">
+        <div class="hold-timer-label">Hold Timer</div>
+        <div class="hold-timer-display" id="hold-cd-${idx}">${secs}s</div>
+        <div class="hold-sets-info">Set <span id="hold-cur-${idx}">1</span> of 3</div>
+        <div class="hold-btn-row">
+          <button class="hold-btn" onclick="resetHold(${idx}, ${secs})">Reset</button>
+          <button class="hold-btn primary" id="hold-btn-${idx}" onclick="toggleHold(${idx}, ${secs})">Start</button>
         </div>
       </div>
     </div>`;
@@ -1166,9 +1299,9 @@ function renderHistory() {
 
   let html = '';
   history.forEach(record => {
-    const typeMap = { 'push-a': 'push', 'push-b': 'push', 'pull-a': 'pull', 'pull-b': 'pull', 'ant-1': 'ant', 'ant-2': 'ant', 'kb-power': 'kb', 'ab-circuit': 'ab' };
+    const typeMap = { 'push-a': 'push', 'push-b': 'push', 'pull-a': 'pull', 'pull-b': 'pull', 'ant-1': 'ant', 'ant-2': 'ant', 'kb-power': 'kb', 'ab-circuit': 'ab', 'band-push': 'band', 'band-pull': 'band' };
     const type = typeMap[record.workoutId] || 'push';
-    const dotColor = { push: 'var(--push)', pull: 'var(--pull)', ant: 'var(--ant)', kb: 'var(--kb)', ab: 'var(--ab)' }[type];
+    const dotColor = { push: 'var(--push)', pull: 'var(--pull)', ant: 'var(--ant)', kb: 'var(--kb)', ab: 'var(--ab)', band: 'var(--band)' }[type];
 
     html += `<div class="history-card">
       <div class="history-header">
@@ -1277,7 +1410,7 @@ function updateAmrapDisplay() {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   HOLD TIMER (dead bug / hollow body)
+   HOLD TIMER (hollow body — full centred display)
 ══════════════════════════════════════════════════════════════════════════ */
 const holdState = {}; // { idx: { interval, running, secondsLeft, setsCompleted, totalSets } }
 
@@ -1286,52 +1419,67 @@ function toggleHold(idx, totalSeconds) {
     holdState[idx] = { interval: null, running: false, secondsLeft: totalSeconds, setsCompleted: 0, totalSets: 3 };
   }
   const state = holdState[idx];
-  const cd = document.getElementById(`hold-cd-${idx}`);
+  const display = document.getElementById(`hold-cd-${idx}`);
   const btn = document.getElementById(`hold-btn-${idx}`);
+  const curEl = document.getElementById(`hold-cur-${idx}`);
 
   if (state.running) {
     // Pause
     clearInterval(state.interval);
     state.running = false;
     btn.textContent = 'Resume';
-    btn.className = 'hold-start-btn';
-  } else {
-    if (state.secondsLeft <= 0) {
-      // Set complete — move to next
-      state.setsCompleted++;
-      state.secondsLeft = totalSeconds;
-      const doneEl = document.getElementById(`hold-done-${idx}`);
-      if (doneEl) doneEl.textContent = `${state.setsCompleted} / ${state.totalSets}`;
-      if (state.setsCompleted >= state.totalSets) {
-        cd.textContent = 'Done!';
-        cd.className = 'hold-countdown done';
-        btn.textContent = '✓ All sets';
-        btn.className = 'hold-start-btn running';
-        return;
-      }
-      cd.textContent = `${totalSeconds}s`;
-      cd.className = 'hold-countdown';
-      btn.textContent = 'Hold';
+    btn.className = 'hold-btn primary';
+    return;
+  }
+
+  // If timer just hit 0 — advance to next set
+  if (state.secondsLeft <= 0) {
+    state.setsCompleted++;
+    if (state.setsCompleted >= state.totalSets) {
+      display.textContent = '✓';
+      display.className = 'hold-timer-display done';
+      btn.textContent = 'All done!';
+      btn.className = 'hold-btn';
+      if (curEl) curEl.textContent = state.totalSets;
       return;
     }
-    // Start / resume
-    state.running = true;
-    btn.textContent = 'Running…';
-    btn.className = 'hold-start-btn running';
-    state.interval = setInterval(() => {
-      state.secondsLeft--;
-      cd.textContent = `${state.secondsLeft}s`;
-      cd.className = 'hold-countdown' + (state.secondsLeft <= 10 ? ' warning' : '');
-      if (state.secondsLeft <= 0) {
-        clearInterval(state.interval);
-        state.running = false;
-        cd.textContent = '0s ✓';
-        cd.className = 'hold-countdown done';
-        btn.textContent = 'Next set';
-        btn.className = 'hold-start-btn';
-      }
-    }, 1000);
+    state.secondsLeft = totalSeconds;
+    display.textContent = `${totalSeconds}s`;
+    display.className = 'hold-timer-display';
+    if (curEl) curEl.textContent = state.setsCompleted + 1;
+    btn.textContent = 'Start';
+    return;
   }
+
+  // Start / resume countdown
+  state.running = true;
+  btn.textContent = 'Pause';
+  btn.className = 'hold-btn';
+
+  state.interval = setInterval(() => {
+    state.secondsLeft--;
+    display.textContent = `${state.secondsLeft}s`;
+    display.className = 'hold-timer-display' + (state.secondsLeft <= 10 ? ' warning' : '');
+    if (state.secondsLeft <= 0) {
+      clearInterval(state.interval);
+      state.running = false;
+      display.textContent = '0s';
+      display.className = 'hold-timer-display done';
+      btn.textContent = state.setsCompleted + 1 >= state.totalSets ? 'All done!' : 'Next set →';
+      btn.className = 'hold-btn primary';
+    }
+  }, 1000);
+}
+
+function resetHold(idx, totalSeconds) {
+  if (holdState[idx]) clearInterval(holdState[idx].interval);
+  holdState[idx] = { interval: null, running: false, secondsLeft: totalSeconds, setsCompleted: 0, totalSets: 3 };
+  const display = document.getElementById(`hold-cd-${idx}`);
+  const btn = document.getElementById(`hold-btn-${idx}`);
+  const curEl = document.getElementById(`hold-cur-${idx}`);
+  if (display) { display.textContent = `${totalSeconds}s`; display.className = 'hold-timer-display'; }
+  if (btn) { btn.textContent = 'Start'; btn.className = 'hold-btn primary'; }
+  if (curEl) curEl.textContent = '1';
 }
 
 // Register service worker for PWA offline support
