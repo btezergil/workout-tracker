@@ -1,5 +1,5 @@
 // Cache version is auto-bumped by GitHub Actions on every push — do not edit manually.
-const CACHE = 'workouts-v3';
+const CACHE = 'workouts-20260708082339';
 const ASSETS = [
   './',
   './index.html',
