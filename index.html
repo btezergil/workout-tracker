@@ -581,19 +581,20 @@ const WORKOUTS = {
 
   'pull-a': {
     id: 'pull-a', name: 'Pull A', type: 'pull',
-    sub: 'Back & bicep focus · ~45–55 min',
+    sub: 'Back & bicep focus · ~50–60 min',
     groups: [{
       label: null,
       exercises: [
-        { name: 'Single-arm KB row', scheme: '4 × 8–10 each', muscle: 'Lats, rhomboids, rear delt, biceps', note: '20kg KB. Brace knee on bench. Row toward hip, not armpit. Pause at top 1s. Lower slowly — eccentric matters.' },
-        { name: 'Bent-over dumbbell row (bilateral)', scheme: '3 × 10–12', muscle: 'Lats, mid-back, traps', note: 'Hinge ~45°. Pull elbows toward hips. Avoid shrugging at top. Load 18–22kg.', prog: 'At 23kg: slow eccentric to 3s or switch to single-arm supported row.' },
+        { name: 'Pull-up (eccentric focus)', scheme: '4 × 3–5 negatives', muscle: 'Lats, teres major, biceps, rear delts', note: 'Since you can do 1 rep, use negatives to build strength fast. Jump or step up so your chin is over the bar, then lower yourself as slowly as possible — aim for 5–8 seconds down. That\'s one rep. Rest 10–15s between reps within a set. The eccentric (lowering) phase builds strength faster than the concentric (pulling up) for beginners. Each session try to lower a little slower or do one more rep.', prog: 'Week 1–2: 4 × 3 negatives (5s down each). Week 3–4: 4 × 4 negatives (6–7s down). Week 5–6: 4 × 5 negatives (8s down). Then start mixing in band-assisted full reps — loop a resistance band over the bar, kneel or place one foot in it, and pull up. The band takes 20–40% of your weight depending on thickness. Once you hit 5 clean unassisted reps, drop the band.', alt: 'Band-assisted pull-up as an alternative to negatives: more natural movement pattern, easier to progress smoothly.' },
+        { name: 'Chin-up (eccentric focus)', scheme: '3 × 3–5 negatives', muscle: 'Lats, biceps (supinated grip = more bicep activation)', note: 'Same negative approach as pull-ups but underhand grip — most people find chin-ups slightly easier so you may get an extra rep or two here. Lower over 5–8 seconds each rep. Underhand grip engages the bicep more, which helps since your biceps are a limiting factor at this stage.', alt: 'Neutral grip (palms facing each other) if your bar has parallel handles — easiest of the three grips, good to mix in.' },
+        { name: 'Single-arm KB row', scheme: '3 × 8–10 each', muscle: 'Lats, rhomboids, rear delt, biceps', note: '20kg KB. Brace knee on bench. Row toward hip, not armpit. Pause at top 1s. Lower slowly — the eccentric matters.' },
         { name: 'Dumbbell reverse fly (bent over)', scheme: '3 × 14–16', muscle: 'Rear delts, upper traps', note: 'Wide arc, squeeze at top. Light — 5–8kg. Bad form here causes shoulder issues.', alt: 'Lie face-down on inclined bench for stricter form.' },
         { name: 'Resistance band pull-apart', scheme: '3 × 15–20', muscle: 'Rear delts, rhomboids, external rotators', note: 'Hold band at shoulder height, pull to a T. Critical for shoulder health — don\'t skip this.' },
-        { name: 'Dumbbell bicep curl', scheme: '3 × 12', muscle: 'Biceps brachii', note: 'Supinate as you curl. Slow 2–3s eccentric. Load 12–16kg precisely.' },
+        { name: 'Dumbbell bicep curl', scheme: '3 × 12', muscle: 'Biceps brachii', note: 'Supinate as you curl. Slow 2–3s eccentric. Load 12–16kg. Chin-ups already hit the bicep hard — focus on the squeeze here rather than going heavy.' },
         { name: 'Hammer curl', scheme: '2 × 14', muscle: 'Brachialis, brachioradialis', note: 'Neutral grip. Adds arm thickness the regular curl misses. Same or slightly heavier than curl load.' }
       ]
     }],
-    upgrade: 'Pull-up bar (~$25–40 doorframe bar) is the single best addition. Pull-ups can\'t be replicated well with dumbbells. Your rows are well covered — the gap is vertical pulling.'
+    upgrade: 'As pull-ups get easy, a dip belt or weighted vest unlocks endless progression. Loop a band over the bar for assisted reps if you\'re still building up.'
   },
 
   'push-b': {
@@ -614,11 +615,12 @@ const WORKOUTS = {
 
   'pull-b': {
     id: 'pull-b', name: 'Pull B', type: 'pull',
-    sub: 'Width & bicep focus · ~45 min',
+    sub: 'Width & bicep focus · ~50 min',
     groups: [{
       label: null,
       exercises: [
-        { name: 'Resistance band lat pulldown', scheme: '4 × 12–15', muscle: 'Lats, teres major, biceps', note: 'Anchor high over door. Pull elbows down and back toward hips. Use thicker band for more resistance.', alt: 'Replace with pull-ups when you add a bar — this is the bridge until then.' },
+        { name: 'Wide-grip pull-up (eccentric focus)', scheme: '4 × 3–5 negatives', muscle: 'Lats (width emphasis), teres major, rear delts', note: 'Wide grip is harder than standard — at 1-rep baseline, do negatives only here. Jump or step to the top position with hands wider than shoulder width (about 1.5×), lower as slowly as possible over 5–8 seconds. Wide grip shifts emphasis toward lat width. Once you can do 5 clean standard pull-ups, switch this to 3–5 wide-grip reps with band assistance.', prog: 'Progress negatives same as Pull A. Don\'t rush to add band-assisted wide-grip until standard pull-ups feel solid — build the base first, then widen.' },
+        { name: 'Dumbbell pullover', scheme: '3 × 12–14', muscle: 'Lats, serratus, long head of triceps', note: 'Lie on bench, hold one DB with both hands above chest. Lower it in a wide arc behind your head until you feel a deep lat and chest stretch, then pull back to start. Keep a slight bend in the elbows. This is the best free-weight exercise for hitting the lat through a full stretch — a genuinely different stimulus from rows and pull-ups.', alt: 'Cross-bench pullover: lie perpendicular to bench with only shoulders on it and hips dropped — increases the stretch range.' },
         { name: 'Gorilla row (KB)', scheme: '3 × 8–10 each', muscle: 'Lats, rhomboids, core', note: 'Two KBs on floor, wide hinge stance. Row one while stabilising with the other. 20kg + 8kg, or two loaded DBs.' },
         { name: 'Kettlebell swing', scheme: '3 × 15–20', muscle: 'Glutes, hamstrings, lats, traps', note: '20kg KB. Hip hinge drive — not a squat, not a shoulder raise. Explosive hip extension. Lats brace like cracking a walnut in your armpit.' },
         { name: 'Band face pull', scheme: '3 × 15', muscle: 'Rear delts, external rotators, upper traps', note: 'Anchor at face height. Pull to nose with elbows high and wide. Non-negotiable for shoulder health if you bench regularly.' },
@@ -644,7 +646,7 @@ const WORKOUTS = {
         label: 'Superset 2 — upper chest + lat width',
         exercises: [
           { name: '2A · Dumbbell incline press', scheme: '3 × 10–12', muscle: 'Upper pecs, anterior delts', note: '16–20kg. Controlled eccentric.' },
-          { name: '2B · Band lat pulldown', scheme: '3 × 12–15', muscle: 'Lats, teres major', note: 'Anchor over door. Vertical pull pairs with incline press.', alt: 'Replace with pull-ups when you have a bar.' }
+          { name: '2B · Pull-up (eccentric focus)', scheme: '3 × 3 negatives', muscle: 'Lats, teres major, biceps', note: 'Jump to top position, lower slowly over 5–8 seconds. In a superset context keep the negative controlled but don\'t go to complete failure — you need to recover for the next round. 3 negatives per set is enough here.', alt: 'Band-assisted pull-up: loop a band over the bar for partial support if you want full-range reps instead of negatives.' }
         ]
       },
       {
@@ -832,7 +834,7 @@ const WORKOUTS = {
   'band-pull': {
     id: 'band-pull', name: 'Band Pull', type: 'band',
     sub: 'Back · biceps · rear delts · ~40 min',
-    info: 'Your door anchor turns any door into a full cable station. Anchor height is everything: top for lat pulldowns, chest height for rows and face pulls, low for low-to-high movements. Always anchor on the hinge side of a closed door — your pull tightens it into the frame. Give it one sharp test tug before each set. Three bands: light for rear delts and curls, medium for rows, heavy (or doubled) for pulldowns.',
+    info: 'Travel pull session — bands and door anchor only. Anchor height is everything: top for lat pulldowns, chest height for rows and face pulls, low for curls. Always anchor on the hinge side of a closed door and give it a sharp test tug before each set. Three bands: light for rear delts and curls, medium for rows, heavy (or doubled) for pulldowns.',
     groups: [{
       label: null,
       exercises: [
@@ -840,8 +842,9 @@ const WORKOUTS = {
           name: 'Band lat pulldown (anchor at top of door)',
           scheme: '4 × 12–15',
           muscle: 'Lats, teres major, biceps',
-          note: 'Anchor at the very top of the door. Kneel or sit facing the door, arms extended overhead holding the band. Pull elbows down and back toward your hips — not toward your shoulders. Squeeze lats hard at the bottom and hold 1s. Heavy band or stack two. This is your main width builder.',
-          prog: 'Stack two bands. Lean back slightly as you pull for more lat engagement — mimics a cable pulldown exactly.'
+          note: 'Anchor at the very top of the door. Kneel or sit facing the door, arms extended overhead holding the band. Pull elbows down and back toward your hips — not toward your shoulders. Squeeze lats hard at the bottom and hold 1s. Heavy band or stack two.',
+          prog: 'Stack two bands. Lean back slightly as you pull for more lat engagement — mimics a cable pulldown exactly.',
+          alt: 'Dumbbell pullover if you have a DB with you: lie on bed or bench, lower DB in an arc behind your head for a full lat stretch.'
         },
         {
           name: 'Band standing row (anchor at waist height)',
