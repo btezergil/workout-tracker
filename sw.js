@@ -3,6 +3,7 @@ const CACHE = 'workouts-20260726152436';
 const ASSETS = [
   './',
   './index.html',
+  './enhancements.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
@@ -24,8 +25,29 @@ self.addEventListener('activate', e => {
   );
 });
 
-// Fetch: serve from cache, fall back to network
+async function withEnhancements(response) {
+  if (!response || !response.ok) return response;
+  const html = await response.text();
+  if (html.includes('enhancements.js')) {
+    return new Response(html, { status: response.status, statusText: response.statusText, headers: response.headers });
+  }
+  const enhanced = html.replace('</body>', '<script src="./enhancements.js"></script>\n</body>');
+  return new Response(enhanced, { status: response.status, statusText: response.statusText, headers: response.headers });
+}
+
+// Fetch: serve from cache, fall back to network. Inject small runtime enhancements
+// into the app shell so the main single-file app can stay unchanged.
 self.addEventListener('fetch', e => {
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      caches.match(e.request)
+        .then(cached => cached || caches.match('./index.html'))
+        .then(cached => cached || fetch(e.request))
+        .then(withEnhancements)
+    );
+    return;
+  }
+
   e.respondWith(
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
