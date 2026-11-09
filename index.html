@@ -398,7 +398,7 @@
   </div>
   <div class="scroll-area">
 
-    <div class="section-label">Push / Pull</div>
+    <div class="section-label">Home Gym</div>
 
     <div class="split-card" onclick="openWorkout('push-a')">
       <div class="split-dot" style="background:var(--push)"></div>
@@ -432,6 +432,44 @@
       <div class="split-info">
         <div class="split-name">Pull B <span class="badge badge-pull">Pull</span></div>
         <div class="split-meta">Back, posterior chain & grip · 8 exercises · ~55–65 min</div>
+      </div>
+      <div class="split-arrow">›</div>
+    </div>
+
+    <div class="section-label">Gym</div>
+
+    <div class="split-card" onclick="openWorkout('gym-push-a')">
+      <div class="split-dot" style="background:var(--push)"></div>
+      <div class="split-info">
+        <div class="split-name">Gym Push A <span class="badge badge-push">Push</span></div>
+        <div class="split-meta">Chest emphasis · 7 exercises · 22 working sets · ~60–75 min</div>
+      </div>
+      <div class="split-arrow">›</div>
+    </div>
+
+    <div class="split-card" onclick="openWorkout('gym-pull-a')">
+      <div class="split-dot" style="background:var(--pull)"></div>
+      <div class="split-info">
+        <div class="split-name">Gym Pull A <span class="badge badge-pull">Pull</span></div>
+        <div class="split-meta">Rows, rear delts & upper-back control · 7 exercises · 20 working sets · ~50–65 min</div>
+      </div>
+      <div class="split-arrow">›</div>
+    </div>
+
+    <div class="split-card" onclick="openWorkout('gym-push-b')">
+      <div class="split-dot" style="background:var(--push)"></div>
+      <div class="split-info">
+        <div class="split-name">Gym Push B <span class="badge badge-push">Push</span></div>
+        <div class="split-meta">Shoulders & triceps emphasis · 7 exercises · 22 working sets · ~60–75 min</div>
+      </div>
+      <div class="split-arrow">›</div>
+    </div>
+
+    <div class="split-card" onclick="openWorkout('gym-pull-b')">
+      <div class="split-dot" style="background:var(--pull)"></div>
+      <div class="split-info">
+        <div class="split-name">Gym Pull B <span class="badge badge-pull">Pull</span></div>
+        <div class="split-meta">Pull-up progression, lats & posterior chain · 8 exercises · 24 working sets · ~60–75 min</div>
       </div>
       <div class="split-arrow">›</div>
     </div>
@@ -628,6 +666,269 @@ const WORKOUTS = {
         { name: 'Dumbbell shrug', scheme: '3 × 15', muscle: 'Upper traps', note: 'Elevate straight up, don\'t roll. 18–23kg — one of the few exercises where you can use close to max DB weight.' }
       ]
     }]
+  },
+
+  'gym-push-a': {
+    "id": "gym-push-a",
+    "name": "Gym Push A",
+    "type": "push",
+    "sub": "Chest emphasis · 7 exercises · 22 working sets · ~60–75 min",
+    "info": "Complete exercises in order. Warm up for 5–10 minutes, then use progressively heavier preparation sets for the main lifts; warm-up sets are not included in the working-set total. Generally finish with about 2 clean reps available, initially 3 on unfamiliar movements. Rest 2–3 minutes for demanding compound movements and 60–90 seconds for isolation work, taking longer when needed to maintain performance. Once every working set reaches the top of its rep range with the intended effort and technique, increase by the smallest practical weight increment. For unilateral exercises, complete the listed sets on each side. Log dumbbell load per dumbbell and barbell load including the bar. Machine stack numbers vary: use the same machine and settings to compare progress. Choose the corresponding home or gym workout for each slot in your rotation; they have separate session histories. Dedicated core work stays at home. Time estimates include warm-up, normal rests and equipment changes.",
+    "groups": [
+      {
+        "label": null,
+        "exercises": [
+          {
+            "name": "Barbell bench press",
+            "scheme": "4 × 6–8",
+            "muscle": "Pecs, anterior delts, triceps",
+            "note": "Set the rack safeties or use a spotter. Keep feet planted and upper back stable. Lower under control to a comfortable chest contact, then press without bouncing. Log total barbell weight including the bar.",
+            "prog": "Reach 4 × 8 with about 2 reps available, then increase by the smallest practical plate increment and return toward 6 reps."
+          },
+          {
+            "name": "Barbell back squat",
+            "scheme": "3 × 6–10",
+            "muscle": "Quads, glutes, adductors, trunk stabilisers",
+            "note": "Use a rack with safeties set for your depth. Brace before each rep, keep the whole foot planted and squat to a controlled depth you can repeat. Start conservatively with around 3 reps available while establishing your gym loads. Avoid grinding reps, especially before football. Log total barbell weight including the bar.",
+            "prog": "Build to 3 × 10 with consistent depth and control, then add a small amount of weight and return toward 6 reps."
+          },
+          {
+            "name": "Incline dumbbell press",
+            "scheme": "3 × 8–12",
+            "muscle": "Upper pecs, anterior delts, triceps",
+            "note": "Set the bench around 30°. Keep shoulder blades supported, lower the dumbbells under control and press through a comfortable range. Log the weight of one dumbbell.",
+            "prog": "Reach 3 × 12 with controlled reps, then increase each dumbbell and return toward 8 reps."
+          },
+          {
+            "name": "Seated machine shoulder press",
+            "scheme": "3 × 10–12",
+            "muscle": "Deltoids, triceps",
+            "note": "Adjust the seat so the handles begin near shoulder height. Keep your back supported and ribs controlled; use a comfortable grip and avoid forcing the bottom position. Log the selected stack load and reuse the same machine settings.",
+            "prog": "Reach 3 × 12 cleanly, then increase the stack by one small increment."
+          },
+          {
+            "name": "Cable lateral raise",
+            "scheme": "3 × 12–20 each side",
+            "muscle": "Lateral delts",
+            "note": "Use a low pulley and work one arm at a time. Keep a soft elbow and raise in a comfortable path to around shoulder height without swinging or shrugging. Log the stack load; complete the listed sets on both sides.",
+            "prog": "Build to 3 × 20 each side, then increase by the smallest increment and return toward 12 reps."
+          },
+          {
+            "name": "Pec deck fly",
+            "scheme": "3 × 12–15",
+            "muscle": "Pecs",
+            "note": "Adjust the seat so the handles or pads sit around chest height. Maintain a soft elbow and bring the arms together without throwing the torso forward. Use a comfortable stretch rather than forcing the arms far behind you.",
+            "prog": "Reach 3 × 15 with controlled returns, then increase the stack slightly."
+          },
+          {
+            "name": "Overhead cable triceps extension",
+            "scheme": "3 × 10–15",
+            "muscle": "Triceps, long head at a lengthened position",
+            "note": "Face away from the cable with a stable stance and arms overhead. Keep ribs controlled and upper arms reasonably still while bending and straightening the elbows. Choose a comfortable shoulder position and avoid turning the movement into a torso swing.",
+            "prog": "Reach 3 × 15 with stable upper arms, then add the smallest available stack increment."
+          }
+        ]
+      }
+    ]
+  },
+
+  'gym-pull-a': {
+    "id": "gym-pull-a",
+    "name": "Gym Pull A",
+    "type": "pull",
+    "sub": "Rows, rear delts & upper-back control · 7 exercises · 20 working sets · ~50–65 min",
+    "info": "Complete exercises in order. Warm up for 5–10 minutes, then use progressively heavier preparation sets for the main lifts; warm-up sets are not included in the working-set total. Generally finish with about 2 clean reps available, initially 3 on unfamiliar movements. Rest 2–3 minutes for demanding compound movements and 60–90 seconds for isolation work, taking longer when needed to maintain performance. Once every working set reaches the top of its rep range with the intended effort and technique, increase by the smallest practical weight increment. For unilateral exercises, complete the listed sets on each side. Log dumbbell load per dumbbell and barbell load including the bar. Machine stack numbers vary: use the same machine and settings to compare progress. Choose the corresponding home or gym workout for each slot in your rotation; they have separate session histories. Dedicated core work stays at home. Time estimates include warm-up, normal rests and equipment changes.",
+    "groups": [
+      {
+        "label": null,
+        "exercises": [
+          {
+            "name": "Pull-up (unassisted)",
+            "scheme": "4 × 3–5",
+            "muscle": "Lats, upper back, biceps, grip",
+            "note": "Use a comfortable shoulder-width overhand grip and begin from a controlled hang. Pull without kipping, then lower under control through a repeatable range. End the set before you need momentum or shortened reps. Leave kg blank for bodyweight work; log only added weight if used.",
+            "prog": "Build toward 4 × 5 clean reps, then gradually extend toward 6–8 before adding weight. Pull B provides additional practice with assistance."
+          },
+          {
+            "name": "Chest-supported machine row",
+            "scheme": "3 × 8–12",
+            "muscle": "Rhomboids, middle traps, lats, rear delts",
+            "note": "Adjust the seat and chest pad so you can reach forward without losing support. Row toward the lower ribs with elbows in a comfortable path, pause briefly and return under control. Keep your chest on the pad.",
+            "prog": "Reach 3 × 12 with a controlled reach and pull, then increase the stack slightly."
+          },
+          {
+            "name": "Reverse pec deck",
+            "scheme": "3 × 12–20",
+            "muscle": "Rear delts, middle traps, rhomboids",
+            "note": "Face the pad with handles around shoulder height. Keep elbows softly bent and open the arms without thrusting your chest or shrugging. Use a light enough load to control the return.",
+            "prog": "Build to 3 × 20 with a steady torso, then increase by the smallest practical increment."
+          },
+          {
+            "name": "Incline-bench I-Y-T raise",
+            "scheme": "3 × 5–8 cycles",
+            "muscle": "Middle and lower traps, rotator cuff, shoulder-blade control",
+            "note": "Lie chest-down on an incline bench. One cycle is one I raise with arms overhead, one Y raise diagonally overhead and one T raise out to the sides; lower between each raise. Keep thumbs generally up, move slowly and avoid shrugging or lifting your chest. Begin with no weight or very light dumbbells. Log cycles in the reps field and the weight per dumbbell in kg; use 0 for unweighted work.",
+            "prog": "Build to 3 × 8 smooth cycles before adding a very small amount of weight. Keep this a control exercise rather than chasing heavy loads."
+          },
+          {
+            "name": "Cable biceps curl",
+            "scheme": "3 × 10–15",
+            "muscle": "Biceps brachii",
+            "note": "Use a low pulley with a comfortable bar or handle. Keep upper arms near your sides and torso still. Curl through a comfortable range, then lower without letting the stack pull you forward.",
+            "prog": "Reach 3 × 15 without swinging, then increase the stack slightly."
+          },
+          {
+            "name": "Dumbbell hammer curl",
+            "scheme": "2 × 10–15",
+            "muscle": "Brachialis, brachioradialis, biceps",
+            "note": "Keep a neutral grip and elbows near your sides. Lift without swinging the torso and lower slowly. Log the weight per dumbbell; complete reps on both arms.",
+            "prog": "Reach 2 × 15 cleanly, then increase each dumbbell by the smallest practical increment."
+          },
+          {
+            "name": "Dumbbell forearm pronation / supination",
+            "scheme": "2 × 10–12 each side",
+            "muscle": "Forearm pronators, supinators, wrist stabilisers",
+            "note": "Support the forearm with the elbow bent around 90°. Hold a very light dumbbell with a slightly offset grip and rotate slowly through a comfortable range. One rep is a controlled rotation out and back. Keep the wrist aligned; shorten the lever by gripping nearer the centre when needed. Log the dumbbell load and complete sets on each side.",
+            "prog": "Build smooth control through the range before increasing leverage or weight. Do not force through wrist or elbow discomfort."
+          }
+        ]
+      }
+    ]
+  },
+
+  'gym-push-b': {
+    "id": "gym-push-b",
+    "name": "Gym Push B",
+    "type": "push",
+    "sub": "Shoulders & triceps emphasis · 7 exercises · 22 working sets · ~60–75 min",
+    "info": "Complete exercises in order. Warm up for 5–10 minutes, then use progressively heavier preparation sets for the main lifts; warm-up sets are not included in the working-set total. Generally finish with about 2 clean reps available, initially 3 on unfamiliar movements. Rest 2–3 minutes for demanding compound movements and 60–90 seconds for isolation work, taking longer when needed to maintain performance. Once every working set reaches the top of its rep range with the intended effort and technique, increase by the smallest practical weight increment. For unilateral exercises, complete the listed sets on each side. Log dumbbell load per dumbbell and barbell load including the bar. Machine stack numbers vary: use the same machine and settings to compare progress. Choose the corresponding home or gym workout for each slot in your rotation; they have separate session histories. Dedicated core work stays at home. Time estimates include warm-up, normal rests and equipment changes.",
+    "groups": [
+      {
+        "label": null,
+        "exercises": [
+          {
+            "name": "Seated dumbbell shoulder press",
+            "scheme": "4 × 6–10",
+            "muscle": "Deltoids, triceps",
+            "note": "Use a supported upright bench, keep feet planted and ribs controlled. Press from a comfortable shoulder-height position without bouncing or arching to finish the rep. Log the weight per dumbbell.",
+            "prog": "Reach 4 × 10 with about 2 clean reps available, then increase each dumbbell and return toward 6 reps."
+          },
+          {
+            "name": "Parallel-bar dip",
+            "scheme": "3 × 6–10",
+            "muscle": "Triceps, pecs, anterior delts",
+            "note": "Keep a fairly upright torso and lower under control through a depth comfortable for your shoulders. Avoid bouncing or forcing a deep bottom position. Use the assisted dip machine if needed to complete clean reps, stopping with 1–2 reps available. Leave kg blank for bodyweight; enter added weight for weighted dips, or negative assistance (for example -20 for 20 kg assistance) when using the machine. Compare sessions using the same setup.",
+            "prog": "Build to 3 × 10 controlled reps. Reduce assistance gradually until bodyweight is comfortable, then add small amounts of weight when appropriate."
+          },
+          {
+            "name": "Machine chest press",
+            "scheme": "3 × 8–12",
+            "muscle": "Pecs, anterior delts, triceps",
+            "note": "Adjust the seat so handles sit around mid-chest height. Keep your upper back supported and use a comfortable elbow path. Press smoothly and control the return; expect a lighter load after shoulder presses and dips.",
+            "prog": "Reach 3 × 12 without shortening the range, then increase the stack by a small increment."
+          },
+          {
+            "name": "Dumbbell reverse lunge",
+            "scheme": "3 × 8–12 each leg",
+            "muscle": "Quads, glutes, adductors, single-leg stability",
+            "note": "Step backward, keep the front foot planted and lower under control. Push through the front leg to return. Hold dumbbells at your sides and log the weight per dumbbell. Complete the listed reps on each leg. Keep a little further from failure when football is the next day.",
+            "prog": "Reach 3 × 12 each leg with stable balance and knee tracking, then increase each dumbbell and return toward 8 reps."
+          },
+          {
+            "name": "Cable lateral raise",
+            "scheme": "3 × 12–20 each side",
+            "muscle": "Lateral delts",
+            "note": "Use a low pulley and work one arm at a time. Keep a soft elbow and raise to around shoulder height without swinging or shrugging. Complete the listed sets on each side and log the stack load.",
+            "prog": "Build to 3 × 20 each side, then increase by the smallest increment and return toward 12 reps."
+          },
+          {
+            "name": "Low-to-high cable fly",
+            "scheme": "3 × 12–15",
+            "muscle": "Pecs, upper-chest emphasis",
+            "note": "Set both pulleys low and use a stable staggered stance. With soft elbows, bring the hands upward and inward toward upper-chest height. Control the return and avoid converting the fly into a press. Log the load per cable stack.",
+            "prog": "Reach 3 × 15 with a consistent arc and stable torso, then increase each stack slightly."
+          },
+          {
+            "name": "Rope triceps pushdown",
+            "scheme": "3 × 10–15",
+            "muscle": "Triceps",
+            "note": "Use a high pulley. Keep elbows near your sides and upper arms still, extend the elbows and separate the rope ends slightly if comfortable. Avoid driving the movement with your shoulders or bodyweight.",
+            "prog": "Reach 3 × 15 with controlled returns, then increase the stack by the smallest increment."
+          }
+        ]
+      }
+    ]
+  },
+
+  'gym-pull-b': {
+    "id": "gym-pull-b",
+    "name": "Gym Pull B",
+    "type": "pull",
+    "sub": "Pull-up progression, lats & posterior chain · 8 exercises · 24 working sets · ~60–75 min",
+    "info": "Complete exercises in order. Warm up for 5–10 minutes, then use progressively heavier preparation sets for the main lifts; warm-up sets are not included in the working-set total. Generally finish with about 2 clean reps available, initially 3 on unfamiliar movements. Rest 2–3 minutes for demanding compound movements and 60–90 seconds for isolation work, taking longer when needed to maintain performance. Once every working set reaches the top of its rep range with the intended effort and technique, increase by the smallest practical weight increment. For unilateral exercises, complete the listed sets on each side. Log dumbbell load per dumbbell and barbell load including the bar. Machine stack numbers vary: use the same machine and settings to compare progress. Choose the corresponding home or gym workout for each slot in your rotation; they have separate session histories. Dedicated core work stays at home. Time estimates include warm-up, normal rests and equipment changes.",
+    "groups": [
+      {
+        "label": null,
+        "exercises": [
+          {
+            "name": "Assisted pull-up",
+            "scheme": "4 × 6–8",
+            "muscle": "Lats, upper back, biceps, pull-up technique",
+            "note": "Use a comfortable shoulder-width overhand grip similar to Pull A. Choose assistance that allows full controlled reps with about 2 reps available. Pull without swinging and lower under control. Enter assistance as a negative kg value: for example, -20 means 20 kg assistance; moving toward 0 means less assistance. Use the same machine and setup for comparisons.",
+            "prog": "Once all 4 sets reach 8 controlled reps with a little effort remaining, reduce assistance by the smallest increment and build back from 6. A develops unassisted reps; B accumulates more controlled practice."
+          },
+          {
+            "name": "Dumbbell Romanian deadlift",
+            "scheme": "3 × 8–10",
+            "muscle": "Hamstrings, glutes, spinal erectors",
+            "note": "Stand with soft knees and dumbbells close to your legs. Brace, push hips backward and lower only as far as you can maintain your trunk position and feel the hamstrings load. Stand by driving the hips forward without leaning back. Begin conservatively with around 3 reps available, especially around football. Log the weight per dumbbell.",
+            "prog": "Reach 3 × 10 with a repeatable hinge and controlled lowering, then increase each dumbbell slightly and return toward 8 reps."
+          },
+          {
+            "name": "Seated cable row",
+            "scheme": "3 × 8–12",
+            "muscle": "Lats, rhomboids, middle traps, biceps",
+            "note": "Sit tall with softly bent knees. Reach forward under control, then row toward the lower ribs without rocking your torso. Allow natural shoulder-blade movement while keeping the lower back steady.",
+            "prog": "Reach 3 × 12 with a controlled reach and pull, then increase the stack slightly."
+          },
+          {
+            "name": "Straight-arm cable pulldown",
+            "scheme": "3 × 12–15",
+            "muscle": "Lats, teres major",
+            "note": "Use a high pulley and a rope or straight bar. Keep a slight elbow bend that stays nearly fixed as you sweep the arms down toward your thighs. Keep ribs controlled and avoid turning it into a triceps pushdown or torso swing. This is lighter lat accessory work with little elbow movement, filling the home pullover slot.",
+            "prog": "Reach 3 × 15 with a stable torso and consistent elbow angle, then increase the stack slightly."
+          },
+          {
+            "name": "Cable face pull",
+            "scheme": "3 × 12–20",
+            "muscle": "Rear delts, middle and lower traps, external rotators",
+            "note": "Set the rope around face height. Pull toward your face with elbows in a comfortable elevated path and hands finishing beside the head. Keep the neck relaxed and avoid leaning backward to move the stack.",
+            "prog": "Build to 3 × 20 controlled reps, then increase by the smallest practical increment."
+          },
+          {
+            "name": "Incline dumbbell curl",
+            "scheme": "3 × 10–12",
+            "muscle": "Biceps brachii",
+            "note": "Sit on an incline bench with arms hanging naturally. Keep your upper arms still, curl without swinging and lower through a comfortable range. Avoid forcing the shoulders backward. Log the weight per dumbbell.",
+            "prog": "Reach 3 × 12 with stable upper arms and controlled lowering, then increase each dumbbell slightly."
+          },
+          {
+            "name": "Dumbbell shrug",
+            "scheme": "3 × 12–15",
+            "muscle": "Upper traps, grip",
+            "note": "Stand tall and elevate the shoulders smoothly, pause briefly and lower under control. Keep arms straight without rolling the shoulders or bouncing through the knees. Log the weight per dumbbell.",
+            "prog": "Reach 3 × 15 with a clear pause and controlled lowering, then increase each dumbbell slightly."
+          },
+          {
+            "name": "Dead hang",
+            "scheme": "2 × 20–45 sec",
+            "muscle": "Grip, forearms, shoulder and scapular tolerance",
+            "note": "Use a comfortable pain-free overhand grip and maintain a little shoulder control rather than forcing a deep passive hang. Stop when grip or shoulder position breaks down. Enter actual hold seconds in the reps field and leave kg at 0. Rest 60–90 seconds between holds.",
+            "prog": "Build both holds toward 45 seconds before considering longer holds or added load."
+          }
+        ]
+      }
+    ]
   },
 
   'ant-1': {
@@ -1306,7 +1607,7 @@ function renderHistory() {
   let html = '';
   history.forEach(record => {
     const typeMap = { 'push-a': 'push', 'push-b': 'push', 'pull-a': 'pull', 'pull-b': 'pull', 'ant-1': 'ant', 'ant-2': 'ant', 'kb-power': 'kb', 'ab-circuit': 'ab', 'band-push': 'band', 'band-pull': 'band' };
-    const type = typeMap[record.workoutId] || 'push';
+    const type = typeMap[record.workoutId] || WORKOUTS[record.workoutId]?.type || 'push';
     const dotColor = { push: 'var(--push)', pull: 'var(--pull)', ant: 'var(--ant)', kb: 'var(--kb)', ab: 'var(--ab)', band: 'var(--band)' }[type];
 
     html += `<div class="history-card">
@@ -1498,4 +1799,5 @@ if ('serviceWorker' in navigator) {
 <script src="./enhancements.js"></script>
 </body>
 </html>
+
 

@@ -1,5 +1,5 @@
 // Cache version is auto-bumped by GitHub Actions on app updates.
-const CACHE = 'workouts-20261109135528';
+const CACHE = 'workouts-20261109-gym-v1';
 const ASSETS = [
   './',
   './index.html',
@@ -52,4 +52,5 @@ self.addEventListener('fetch', e => {
     caches.match(e.request).then(cached => cached || fetch(e.request))
   );
 });
+
 
