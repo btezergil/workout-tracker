@@ -1,5 +1,5 @@
 // Cache version is auto-bumped by GitHub Actions on app updates.
-const CACHE = 'workouts-20261109-core-v1';
+const CACHE = 'workouts-20261109135528';
 const ASSETS = [
   './',
   './index.html',
