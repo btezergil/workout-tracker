@@ -35,6 +35,9 @@ function program(){
  const wp=exercise('pull-b',['Wide-grip pull-up (eccentric focus)','Wide-grip pull-up (unassisted)','Wide-grip pull-up']);if(wp){wp.name='Wide-grip pull-up (unassisted)';wp.scheme='4 × 3–5 clean reps';wp.note='Use a comfortably wide pronated grip and perform strict unassisted reps. Stop before kipping or losing shoulder position.';wp.prog='Build toward 4 × 5 clean reps, then extend the rep range. Keep the grip only as wide as remains comfortable at the wrists and shoulders.'}
  append('push-a',{name:'Dumbbell goblet squat',scheme:'3 × 8–12',muscle:'Quads, glutes, adductors, core',note:'Hold one adjustable dumbbell vertically at the chest. Sit down between the hips with the whole foot planted, then drive up through mid-foot. The adjustable DB is preferred to the fixed 20kg KB so load can progress gradually. Keep 1–3 reps in reserve, especially if football is the next day.',prog:'Reach 3 × 12 with clean depth, then increase load and return toward 8 reps.'});
  append('push-b',{name:'Dumbbell reverse lunge',scheme:'3 × 8–12 each',muscle:'Quads, glutes, adductors, single-leg stability',note:'Step backward, keep the front foot planted and control the descent. Hold dumbbells at your sides and log the load per dumbbell. Avoid taking these close to failure the day before football.',prog:'Reach 3 × 12 each side with stable knee tracking, then increase load and return toward 8 reps.'});
+ // Core finishers follow the leg exercises so bracing stays fresh for the main work.
+ append('push-a',{name:'Hollow body hold',scheme:'3 × 20–30 sec',muscle:'Anterior core, anti-extension, full-body tension',note:'Finish after goblet squats. Press your lower back into the floor, gently tuck the pelvis, lift the shoulder blades and keep breathing. Start with knees tucked and arms by your sides; extend the legs and then arms only as far as you can without arching. End the hold when your lower back lifts. Rest 45–60 seconds between sets. Start with 2 sets for the first few sessions, then build to 3. Log actual hold seconds in the reps field and leave kg at 0.',prog:'Once all 3 holds reach 30 seconds with steady breathing and the lower back down, lengthen the lever slightly and build back from 20 seconds. Quality before longer holds. Count the separate AB Circuit toward your core workload when you use it.',holdTimer:true,holdSeconds:30});
+ append('push-b',{name:'Hanging knee / leg raise',scheme:'3 × 8–12',muscle:'Abdominals, hip flexors, grip and shoulder stabilisers',note:'Finish after reverse lunges. Hang with straight elbows and comfortable shoulder control. Begin with bent knees; raise them while curling your pelvis toward your ribs, then lower over 2–3 seconds without swinging. Lifting the thighs alone is not the goal: include a controlled pelvic curl. Stop with 1–2 clean reps in reserve or when grip or shoulder position breaks down. Rest 60–90 seconds between sets. Start with 2 sets for the first few sessions, then build to 3.',prog:'Build to 3 × 12 controlled knee raises, then gradually straighten the legs and return toward 8 reps. Keep the pelvic curl and controlled lowering; do not chase height with momentum.',alt:'Use bent-knee raises whenever straight-leg reps lose control. Reverse crunches are an option if hanging becomes uncomfortable.'});
  append('pull-a',{name:'KB pronation / supination',scheme:'2 × 10–12 each',muscle:'Forearm pronators, supinators, wrist stabilisers',note:'Sit with the elbow around 90° and forearm supported. Hold the lightest KB by one side of the handle so the bell acts as an offset lever, then rotate slowly through a comfortable range. Choke up toward the bell to reduce leverage. Never force through wrist pain.',prog:'Progress control and range before leverage or load; use slow 2–3s rotations.'});
  append('pull-b',{name:'Dead hang',scheme:'2 × 20–45 sec',muscle:'Grip, forearms, shoulder and scapular tolerance',note:'Use the most comfortable pain-free pronated grip. Keep a little shoulder control instead of aggressively sinking into the joint. Enter seconds in the reps field and leave kg at 0.',prog:'Build both holds toward 45–60 seconds before adding load.'});
  WORKOUTS['bike-zone2']={id:'bike-zone2',name:'Zone 2 Bike',type:'bike',sub:'Easy aerobic · 30–45 min',info:'Ride at a steady conversational effort, roughly RPE 3–4/10. You should be able to speak in full sentences and finish feeling like you could continue. Keep cadence and resistance smooth rather than turning it into intervals. Zone 2 is useful for aerobic base and recovery; body-fat loss still depends mainly on overall energy balance.',groups:[]};
@@ -46,7 +49,29 @@ function bikeCard(){
  const card=document.createElement('div');card.className='split-card';card.id='bike-zone2-card';card.setAttribute('onclick',"openWorkout('bike-zone2')");card.innerHTML='<div class="split-dot" style="background:var(--bike)"></div><div class="split-info"><div class="split-name">Zone 2 Bike <span class="badge badge-bike">Aerobic</span></div><div class="split-meta">Easy conversational pace · 30–45 min</div></div><div class="split-arrow">›</div>';
  const anchor=[...home.querySelectorAll('.section-label')].find(e=>/Travel/i.test(e.textContent))||home.querySelector('.nav-spacer');anchor?anchor.before(section,card):home.append(section,card);
 }
-function counts(){document.querySelectorAll('#screen-home .split-card[onclick^="openWorkout("]').forEach(card=>{const m=card.getAttribute('onclick')?.match(/openWorkout\('([^']+)'\)/),w=m&&WORKOUTS[m[1]],meta=card.querySelector('.split-meta');if(!w?.groups||!meta)return;const n=w.groups.reduce((s,g)=>s+(g.exercises?.length||0),0);if(n)meta.textContent=meta.textContent.replace(/\b\d+\s+(exercises?|exercise pairs|moves?)\b/i,`${n} exercises`)})}
+function counts(){
+ // Estimates include a short warm-up, normal set rests and equipment changes.
+ const sessions={
+  'push-a':{focus:'Chest, shoulders, legs & core',minutes:'55–65'},
+  'pull-a':{focus:'Back, biceps & forearms',minutes:'50–65'},
+  'push-b':{focus:'Shoulders, triceps, legs & core',minutes:'60–70'},
+  'pull-b':{focus:'Back, posterior chain & grip',minutes:'55–65'},
+  'band-push':{focus:'Chest, shoulders & triceps',minutes:'40–50'},
+  'band-pull':{focus:'Back, biceps & rear delts',minutes:'45–55'}
+ };
+ Object.entries(sessions).forEach(([id,details])=>{
+  const w=WORKOUTS[id];if(!w)return;
+  const n=w.groups.reduce((sum,g)=>sum+(g.exercises?.length||0),0);
+  w.sub=`${details.focus} · ${n} exercises · ~${details.minutes} min`;
+ });
+ document.querySelectorAll('#screen-home .split-card[onclick^="openWorkout("]').forEach(card=>{
+  const m=card.getAttribute('onclick')?.match(/openWorkout\('([^']+)'\)/),w=m&&WORKOUTS[m[1]],meta=card.querySelector('.split-meta');
+  if(!w?.groups||!meta)return;
+  const n=w.groups.reduce((sum,g)=>sum+(g.exercises?.length||0),0);
+  if(sessions[m[1]])meta.textContent=w.sub;
+  else if(n)meta.textContent=meta.textContent.replace(/\b\d+\s+(exercises?|exercise pairs|moves?)\b/i,`${n} exercises`);
+ });
+}
 
 function syncInputs(){document.querySelectorAll('#screen-workout .log-row[id^="set-"]').forEach(row=>{const m=row.id.match(/^set-(\d+)-(\d+)$/);if(!m)return;const s=setData[+m[1]]?.sets?.[+m[2]];if(!s)return;const kg=row.querySelector('input[placeholder="kg"]'),reps=row.querySelector('input[placeholder="reps"]');if(kg)s.kg=kg.value;if(reps)s.reps=reps.value})}
 function saveActive(){if(!sessionActive||!currentWorkoutId||!sessionStart)return;syncInputs();localStorage.setItem(ACTIVE_KEY,JSON.stringify({workoutId:currentWorkoutId,sessionStart,savedAt:Date.now(),setData:JSON.parse(JSON.stringify(setData||{}))}))}

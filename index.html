@@ -404,7 +404,7 @@
       <div class="split-dot" style="background:var(--push)"></div>
       <div class="split-info">
         <div class="split-name">Push A <span class="badge badge-push">Push</span></div>
-        <div class="split-meta">Chest & shoulder focus · 6 exercises</div>
+        <div class="split-meta">Chest, shoulders, legs & core · 8 exercises · ~55–65 min</div>
       </div>
       <div class="split-arrow">›</div>
     </div>
@@ -413,7 +413,7 @@
       <div class="split-dot" style="background:var(--pull)"></div>
       <div class="split-info">
         <div class="split-name">Pull A <span class="badge badge-pull">Pull</span></div>
-        <div class="split-meta">Back & bicep focus · 6 exercises</div>
+        <div class="split-meta">Back, biceps & forearms · 7 exercises · ~50–65 min</div>
       </div>
       <div class="split-arrow">›</div>
     </div>
@@ -422,7 +422,7 @@
       <div class="split-dot" style="background:var(--push)"></div>
       <div class="split-info">
         <div class="split-name">Push B <span class="badge badge-push">Push</span></div>
-        <div class="split-meta">Shoulder & tricep focus · 6 exercises</div>
+        <div class="split-meta">Shoulders, triceps, legs & core · 8 exercises · ~60–70 min</div>
       </div>
       <div class="split-arrow">›</div>
     </div>
@@ -431,7 +431,7 @@
       <div class="split-dot" style="background:var(--pull)"></div>
       <div class="split-info">
         <div class="split-name">Pull B <span class="badge badge-pull">Pull</span></div>
-        <div class="split-meta">Width & bicep focus · 6 exercises</div>
+        <div class="split-meta">Back, posterior chain & grip · 8 exercises · ~55–65 min</div>
       </div>
       <div class="split-arrow">›</div>
     </div>
@@ -484,7 +484,7 @@
       <div class="split-dot" style="background:var(--band)"></div>
       <div class="split-info">
         <div class="split-name">Band Push <span class="badge badge-band">Travel</span></div>
-        <div class="split-meta">Chest · shoulders · triceps · no anchor needed</div>
+        <div class="split-meta">Chest, shoulders & triceps · 6 exercises · ~40–50 min</div>
       </div>
       <div class="split-arrow">›</div>
     </div>
@@ -493,7 +493,7 @@
       <div class="split-dot" style="background:var(--band)"></div>
       <div class="split-info">
         <div class="split-name">Band Pull <span class="badge badge-band">Travel</span></div>
-        <div class="split-meta">Back · biceps · rear delts · door anchor</div>
+        <div class="split-meta">Back, biceps & rear delts · 7 exercises · ~45–55 min</div>
       </div>
       <div class="split-arrow">›</div>
     </div>
@@ -563,7 +563,7 @@
 const WORKOUTS = {
   'push-a': {
     id: 'push-a', name: 'Push A', type: 'push',
-    sub: 'Chest & shoulder focus · ~45–55 min',
+    sub: 'Chest, shoulders, legs & core · 8 exercises · ~55–65 min',
     info: null,
     groups: [{
       label: null,
@@ -581,7 +581,7 @@ const WORKOUTS = {
 
   'pull-a': {
     id: 'pull-a', name: 'Pull A', type: 'pull',
-    sub: 'Back & bicep focus · ~50–60 min',
+    sub: 'Back, biceps & forearms · 7 exercises · ~50–65 min',
     groups: [{
       label: null,
       exercises: [
@@ -599,7 +599,7 @@ const WORKOUTS = {
 
   'push-b': {
     id: 'push-b', name: 'Push B', type: 'push',
-    sub: 'Shoulder & tricep focus · ~45 min',
+    sub: 'Shoulders, triceps, legs & core · 8 exercises · ~60–70 min',
     groups: [{
       label: null,
       exercises: [
@@ -615,7 +615,7 @@ const WORKOUTS = {
 
   'pull-b': {
     id: 'pull-b', name: 'Pull B', type: 'pull',
-    sub: 'Width & bicep focus · ~50 min',
+    sub: 'Back, posterior chain & grip · 8 exercises · ~55–65 min',
     groups: [{
       label: null,
       exercises: [
@@ -780,7 +780,7 @@ const WORKOUTS = {
 
   'band-push': {
     id: 'band-push', name: 'Band Push', type: 'band',
-    sub: 'Chest · shoulders · triceps · ~40 min',
+    sub: 'Chest, shoulders & triceps · 6 exercises · ~40–50 min',
     info: 'All exercises use your door anchor. Anchor height changes the exercise — chest height for pressing, high (top of door) for flies and tricep pushdowns. Three bands: light for isolation and laterals, medium for pressing, heavy or doubled for your main compound. Increase resistance by stepping further from the door. Slow 3s eccentrics matter here — bands lose tension at the bottom so controlling the return is what keeps muscles loaded throughout.',
     groups: [{
       label: null,
@@ -833,7 +833,7 @@ const WORKOUTS = {
 
   'band-pull': {
     id: 'band-pull', name: 'Band Pull', type: 'band',
-    sub: 'Back · biceps · rear delts · ~40 min',
+    sub: 'Back, biceps & rear delts · 7 exercises · ~45–55 min',
     info: 'Travel pull session — bands and door anchor only. Anchor height is everything: top for lat pulldowns, chest height for rows and face pulls, low for curls. Always anchor on the hinge side of a closed door and give it a sharp test tug before each set. Three bands: light for rear delts and curls, medium for rows, heavy (or doubled) for pulldowns.',
     groups: [{
       label: null,
@@ -1121,7 +1121,7 @@ function buildExCard(ex, idx, typeColor, isAnt) {
 
   if (ex.prog) html += `<div class="prog-tip">${ex.prog}</div>`;
 
-  // Hold timer (for hollow body / isometric exercises) — full centred display
+  // Hold timer plus standard set logging so actual hold durations reach history.
   if (ex.holdTimer) {
     const secs = ex.holdSeconds || 30;
     html += `<div class="log-area" id="log-${idx}" style="display:none">
@@ -1134,6 +1134,9 @@ function buildExCard(ex, idx, typeColor, isAnt) {
           <button class="hold-btn primary" id="hold-btn-${idx}" onclick="toggleHold(${idx}, ${secs})">Start</button>
         </div>
       </div>
+      <div class="ex-note" style="display:block">Log actual hold seconds in the reps field; leave kg at 0. The timer is a guide.</div>
+      <div id="sets-${idx}"></div>
+      <span class="log-add-set" onclick="addSet(${idx})">+ Add set</span>
     </div>`;
   } else {
     // Standard log area
@@ -1492,5 +1495,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<script src="./enhancements.js"></script>
 </body>
 </html>
+
