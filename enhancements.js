@@ -56,13 +56,18 @@ function counts(){
   'pull-a':{focus:'Back, biceps & forearms',minutes:'50–65'},
   'push-b':{focus:'Shoulders, triceps, legs & core',minutes:'60–70'},
   'pull-b':{focus:'Back, posterior chain & grip',minutes:'55–65'},
+  'gym-push-a':{focus:'Chest emphasis',minutes:'60–75',gym:true},
+  'gym-pull-a':{focus:'Rows, rear delts & upper-back control',minutes:'50–65',gym:true},
+  'gym-push-b':{focus:'Shoulders & triceps emphasis',minutes:'60–75',gym:true},
+  'gym-pull-b':{focus:'Pull-up progression, lats & posterior chain',minutes:'60–75',gym:true},
   'band-push':{focus:'Chest, shoulders & triceps',minutes:'40–50'},
   'band-pull':{focus:'Back, biceps & rear delts',minutes:'45–55'}
  };
  Object.entries(sessions).forEach(([id,details])=>{
   const w=WORKOUTS[id];if(!w)return;
   const n=w.groups.reduce((sum,g)=>sum+(g.exercises?.length||0),0);
-  w.sub=`${details.focus} · ${n} exercises · ~${details.minutes} min`;
+  const volume=details.gym ? ` · ${w.groups.reduce((sum,g)=>sum+g.exercises.reduce((sets,e)=>sets+parseInt(e.scheme,10),0),0)} working sets` : '';
+  w.sub=`${details.focus} · ${n} exercises${volume} · ~${details.minutes} min`;
  });
  document.querySelectorAll('#screen-home .split-card[onclick^="openWorkout("]').forEach(card=>{
   const m=card.getAttribute('onclick')?.match(/openWorkout\('([^']+)'\)/),w=m&&WORKOUTS[m[1]],meta=card.querySelector('.split-meta');
@@ -101,3 +106,4 @@ function styles(){const s=document.createElement('style');s.textContent=`:root{-
 function init(){program();aliases();styles();bikeCard();transferUI();historyDecor();persistence();counts();restore()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
+
