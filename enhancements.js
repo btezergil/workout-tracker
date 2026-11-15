@@ -79,7 +79,15 @@ function counts(){
 }
 
 function syncInputs(){document.querySelectorAll('#screen-workout .log-row[id^="set-"]').forEach(row=>{const m=row.id.match(/^set-(\d+)-(\d+)$/);if(!m)return;const s=setData[+m[1]]?.sets?.[+m[2]];if(!s)return;const kg=row.querySelector('input[placeholder="kg"]'),reps=row.querySelector('input[placeholder="reps"]');if(kg)s.kg=kg.value;if(reps)s.reps=reps.value})}
-function saveActive(){if(!sessionActive||!currentWorkoutId||!sessionStart)return;syncInputs();localStorage.setItem(ACTIVE_KEY,JSON.stringify({workoutId:currentWorkoutId,sessionStart,savedAt:Date.now(),setData:JSON.parse(JSON.stringify(setData||{}))}))}
+function saveActive(){
+ if(!sessionActive||!currentWorkoutId||!sessionStart)return;
+ syncInputs();
+ const exerciseNames=[];
+ eachExercise(WORKOUTS[currentWorkoutId],exercise=>exerciseNames.push(exercise.name));
+ localStorage.setItem(ACTIVE_KEY,JSON.stringify({
+  workoutId:currentWorkoutId,sessionStart,savedAt:Date.now(),exerciseNames,setData
+ }));
+}
 function clearActive(){localStorage.removeItem(ACTIVE_KEY)}
 function savedActive(){try{return JSON.parse(localStorage.getItem(ACTIVE_KEY)||'null')}catch{return null}}
 function timerNow(){const e=document.getElementById('timer-val');if(!e||!sessionStart)return;const t=Math.max(0,Math.floor((Date.now()-sessionStart)/1000));e.textContent=`${Math.floor(t/60)}:${String(t%60).padStart(2,'0')}`}
@@ -96,7 +104,15 @@ function persistence(){
 function restore(){
  const s=savedActive();if(!s?.workoutId||!s.sessionStart||!WORKOUTS[s.workoutId])return;
  if(Date.now()-s.sessionStart>12*60*60*1000&&!confirm('An unfinished workout from more than 12 hours ago was found. Resume it?')){clearActive();return}
- openWorkout(s.workoutId);if(s.setData&&typeof s.setData==='object')Object.keys(s.setData).forEach(i=>setData[i]=s.setData[i]);sessionActive=true;sessionStart=Number(s.sessionStart);
+ openWorkout(s.workoutId);
+ let index=0;
+ eachExercise(WORKOUTS[s.workoutId],exercise=>{
+  const savedName=s.exerciseNames?.[index]??exercise.replaces??exercise.name;
+  const savedSets=s.setData?.[index];
+  if(savedName===exercise.name&&savedSets)setData[index]=savedSets;
+  index++;
+ });
+ sessionActive=true;sessionStart=Number(s.sessionStart);
  Object.keys(setData).forEach(i=>{const l=document.getElementById('log-'+i);if(!l)return;l.style.display='block';if(document.getElementById('sets-'+i))renderSets(+i)});
  const bar=document.getElementById('timer-bar');if(bar)bar.style.display='flex';const btn=document.querySelector('#screen-workout .start-btn');if(btn)btn.style.display='none';stopTimer();timerNow();startTimer();
 }
