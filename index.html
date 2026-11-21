@@ -26,6 +26,7 @@
     --push-bg: #0d2340;
     --pull: #34c97a;
     --pull-bg: #0d2b1a;
+    --upper: #fbba72;
     --ant: #a78bfa;
     --ant-bg: #1a1030;
     --kb: #f97316;
@@ -470,6 +471,15 @@
       <div class="split-info">
         <div class="split-name">Gym Pull B <span class="badge badge-pull">Pull</span></div>
         <div class="split-meta">Pull-up progression, lats & posterior chain · 8 exercises · 24 working sets · ~60–75 min</div>
+      </div>
+      <div class="split-arrow">›</div>
+    </div>
+
+    <div class="split-card" onclick="openWorkout('gym-upper-body')">
+      <div class="split-dot" style="background:var(--upper)"></div>
+      <div class="split-info">
+        <div class="split-name">Gym Upper Body</div>
+        <div class="split-meta">Chest, back, shoulders, arms & grip · 12 exercises · 26 working sets · ~65–80 min</div>
       </div>
       <div class="split-arrow">›</div>
     </div>
@@ -933,6 +943,109 @@ const WORKOUTS = {
     ]
   },
 
+  'gym-upper-body': {
+    "id": "gym-upper-body",
+    "name": "Gym Upper Body",
+    "type": "upper",
+    "sub": "Chest, back, shoulders, arms & grip · 12 exercises · 26 working sets · ~65–80 min",
+    "info": "Complete the exercises in order. Warm up for 5–10 minutes, then do lighter preparation sets for the main lifts. Finish working sets with about 2 clean reps in reserve. Rest 2–3 minutes for the main lifts and 60–90 seconds for isolation work and hangs. When all working sets reach the top of the rep range with clean form and the intended effort, increase by the smallest practical increment. For unilateral exercises, complete each set on both sides and log the reps completed on both. Log dumbbell weight per dumbbell.",
+    "groups": [
+      {
+        "label": "Main lifts",
+        "exercises": [
+          {
+            "name": "Machine chest press",
+            "scheme": "3 × 8–12",
+            "muscle": "Chest, triceps, front delts",
+            "note": "Adjust the seat so the handles start around mid-chest. Keep your back supported and press smoothly. Lower until you feel a comfortable stretch."
+          },
+          {
+            "name": "Lat pulldown",
+            "scheme": "3 × 8–12",
+            "muscle": "Lats, upper back, biceps",
+            "note": "Use a comfortable grip. Pull the handle toward your upper chest with your elbows moving down. Return under control with only a slight torso lean."
+          },
+          {
+            "name": "Single-arm row",
+            "scheme": "2 × 8–12 per side",
+            "muscle": "Lats, upper back, biceps",
+            "note": "Use your usual cable, machine or supported dumbbell setup. Pull your elbow back with a steady torso. Finish each set on both sides and use the same setup across sessions."
+          },
+          {
+            "name": "Shoulder press",
+            "scheme": "2 × 8–12",
+            "muscle": "Front delts, side delts, triceps",
+            "note": "Use a seated machine or dumbbells. Keep your ribs down and press through a comfortable range. Use the same setup across sessions."
+          }
+        ]
+      },
+      {
+        "label": "Chest and shoulders",
+        "exercises": [
+          {
+            "name": "Pec fly",
+            "scheme": "2 × 12–15",
+            "muscle": "Chest",
+            "note": "On the pec deck, set the handles near chest height. Keep a soft bend in your elbows and bring your arms together without forcing the stretch on the return."
+          },
+          {
+            "name": "Lateral raise",
+            "scheme": "2 × 12–20",
+            "muscle": "Side delts",
+            "note": "Lead with your elbows and raise to about shoulder height with a steady torso. Lower under control. If using a single cable handle, complete each set on both sides."
+          }
+        ]
+      },
+      {
+        "label": "Arms",
+        "exercises": [
+          {
+            "name": "EZ-bar curl",
+            "scheme": "2 × 8–12",
+            "muscle": "Biceps, brachialis",
+            "note": "Use a comfortable grip on the angled bar. Keep your upper arms steady and lower without swinging. Log total weight including the bar."
+          },
+          {
+            "name": "Overhead cable triceps extension",
+            "scheme": "2 × 10–15",
+            "muscle": "Triceps",
+            "note": "Face away from the cable with your upper arms near your head. Extend your elbows smoothly and lower through a comfortable stretch."
+          },
+          {
+            "name": "Dumbbell hammer curl",
+            "scheme": "2 × 10–15",
+            "muscle": "Brachialis, brachioradialis, biceps",
+            "note": "Keep your palms facing each other and your elbows near your sides. Lower without swinging and log the weight per dumbbell."
+          },
+          {
+            "name": "Cable pushdown",
+            "scheme": "2 × 10–15",
+            "muscle": "Triceps",
+            "note": "Use a rope or your usual cable handle. Keep your elbows by your sides and straighten your arms without leaning on the handle."
+          }
+        ]
+      },
+      {
+        "label": "Forearms and grip",
+        "exercises": [
+          {
+            "name": "Straight-bar finger curl",
+            "scheme": "2 × 12–20",
+            "muscle": "Finger flexors, forearms",
+            "note": "Use a light straight bar. Keep your wrists steady as you roll the bar toward your fingertips, then close your fingers around it. Keep the bar under control throughout."
+          },
+          {
+            "name": "Dead hang",
+            "scheme": "2 × 20–45 sec",
+            "muscle": "Grip, forearms",
+            "note": "Hang from a pull-up bar with a comfortable overhand grip. Stop before you lose grip or shoulder control. Log the hold in seconds in the reps field and leave kg at 0.",
+            "prog": "Build both holds to 45 seconds before considering added load."
+          }
+        ]
+      }
+    ]
+  },
+
   'ant-1': {
     id: 'ant-1', name: 'Antagonist Day 1', type: 'ant',
     sub: 'Chest & back supersets · ~50 min',
@@ -1281,7 +1394,7 @@ function openWorkout(id) {
 
 function buildWorkoutHTML(wkt) {
   let html = '';
-  const typeColor = { push: 'var(--push)', pull: 'var(--pull)', ant: 'var(--ant)', kb: 'var(--kb)', ab: 'var(--ab)', band: 'var(--band)' }[wkt.type];
+  const typeColor = { push: 'var(--push)', pull: 'var(--pull)', upper: 'var(--upper)', ant: 'var(--ant)', kb: 'var(--kb)', ab: 'var(--ab)', band: 'var(--band)' }[wkt.type];
 
   // Last session banner
   if (lastSessionData) {
@@ -1610,7 +1723,7 @@ function renderHistory() {
   history.forEach(record => {
     const typeMap = { 'push-a': 'push', 'push-b': 'push', 'pull-a': 'pull', 'pull-b': 'pull', 'ant-1': 'ant', 'ant-2': 'ant', 'kb-power': 'kb', 'ab-circuit': 'ab', 'band-push': 'band', 'band-pull': 'band' };
     const type = typeMap[record.workoutId] || WORKOUTS[record.workoutId]?.type || 'push';
-    const dotColor = { push: 'var(--push)', pull: 'var(--pull)', ant: 'var(--ant)', kb: 'var(--kb)', ab: 'var(--ab)', band: 'var(--band)' }[type];
+    const dotColor = { push: 'var(--push)', pull: 'var(--pull)', upper: 'var(--upper)', ant: 'var(--ant)', kb: 'var(--kb)', ab: 'var(--ab)', band: 'var(--band)' }[type];
 
     html += `<div class="history-card">
       <div class="history-header">
