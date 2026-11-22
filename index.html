@@ -175,6 +175,22 @@
   }
   .log-input:focus { outline: none; border-color: var(--push); }
   .log-input::placeholder { color: var(--dim); }
+
+  .start-btn.past-workout-action { margin: 0 0 12px; }
+  .past-entry-fields { display: grid; gap: 12px; margin-bottom: 16px; }
+  .past-entry-fields label { display: grid; gap: 4px; min-width: 0; }
+  .past-entry-fields .log-input { width: 100%; min-height: 44px; text-align: left; color-scheme: dark; }
+  .past-entry-date-time:not([hidden]) { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #past-workout-save[hidden] { display: none; }
+  #past-workout-form .log-input { font-size: 16px; }
+  #past-workout-exercises .ex-scheme { white-space: normal; text-align: right; }
+  .past-sets { padding: 0 14px; }
+  .past-add-set { margin-left: 8px; }
+  .past-set-row .log-input { flex: 1; min-width: 0; max-width: 100px; min-height: 40px; }
+  .past-set-button { background: none; border: 0; color: var(--push); cursor: pointer; font: inherit; min-height: 44px; padding: 0 6px; }
+  .past-entry-error { color: var(--warn); margin: 8px 0; }
+  .past-entry-error:empty, #past-workout-status:empty { display: none; }
+  #past-workout-status { margin-bottom: 12px; }
   .log-x { font-size: 14px; color: var(--dim); padding: 0 2px; }
   .log-done-btn {
     font-size: 12px; padding: 5px 10px; border-radius: var(--radius-sm);
@@ -589,8 +605,12 @@
     </div>
     <div class="topbar-action" onclick="clearHistory()">Clear all</div>
   </div>
-  <div class="scroll-area" id="history-content">
-    <div class="nav-spacer"></div>
+  <div class="scroll-area">
+    <button type="button" class="start-btn past-workout-action" id="log-past-workout" onclick="openPastWorkout()">Log past workout</button>
+    <p id="past-workout-status" role="status"></p>
+    <div id="history-content">
+      <div class="nav-spacer"></div>
+    </div>
   </div>
   <div class="bottom-nav">
     <button class="nav-btn" onclick="showScreen('home')">
@@ -603,6 +623,52 @@
     </button>
   </div>
 </div>
+
+<div id="screen-past-workout" class="screen">
+  <div class="topbar">
+    <button type="button" class="past-set-button" onclick="closePastWorkout()">Cancel</button>
+    <div class="topbar-title">Log past workout</div>
+  </div>
+  <div class="scroll-area">
+    <form id="past-workout-form">
+      <div class="past-entry-fields">
+        <label>Workout
+          <select class="log-input" id="past-workout-choice" required></select>
+        </label>
+        <div class="past-entry-date-time" id="past-workout-date-time" hidden>
+          <label>Date
+            <input class="log-input" id="past-workout-date" type="date" required>
+          </label>
+          <label>Start time (optional)
+            <input class="log-input" id="past-workout-time" type="time">
+          </label>
+        </div>
+      </div>
+      <div id="past-workout-exercises"></div>
+      <p id="past-workout-error" class="past-entry-error" role="alert"></p>
+      <button type="submit" class="finish-btn" id="past-workout-save" hidden>Save workout</button>
+    </form>
+  </div>
+</div>
+
+<template id="past-exercise-template">
+  <section class="ex-card">
+    <div class="ex-header">
+      <div class="ex-name"></div>
+      <div class="ex-scheme"></div>
+    </div>
+    <div class="past-sets"></div>
+    <button type="button" class="past-set-button past-add-set">+ Add set</button>
+  </section>
+</template>
+
+<template id="past-set-template">
+  <div class="log-row past-set-row">
+    <input class="log-input" name="kg" type="number" inputmode="decimal" step="any" placeholder="kg" aria-label="Weight in kilograms">
+    <input class="log-input" name="reps" type="number" inputmode="numeric" min="0" step="1" placeholder="reps" aria-label="Repetitions">
+    <button type="button" class="past-set-button" aria-label="Remove set">Remove</button>
+  </div>
+</template>
 
 <script>
 /* ══════════════════════════════════════════════════════════════════════════
@@ -1341,8 +1407,8 @@ function goHome() {
 // from the most recent saved session for this workoutId, or null.
 function getLastSession(workoutId) {
   const history = getHistory();
-  const last = history.find(r => r.workoutId === workoutId);
-  if (!last || !last.exercises || last.exercises.length === 0) return null;
+  const last = history.find(record => record.workoutId === workoutId && record.exercises?.length);
+  if (!last) return null;
   const map = {};
   last.exercises.forEach(ex => { map[ex.name] = ex.sets; });
   return { map, date: last.date, duration: last.duration };
@@ -1402,7 +1468,7 @@ function buildWorkoutHTML(wkt) {
       <span class="last-session-icon">↩</span>
       <div>
         <div class="last-session-title">Last session loaded</div>
-        <div class="last-session-sub">${lastSessionData.date} · ${lastSessionData.duration}</div>
+        <div class="last-session-sub">${[lastSessionData.date, lastSessionData.duration].filter(Boolean).join(' · ')}</div>
       </div>
     </div>`;
   }
@@ -1703,10 +1769,169 @@ function finishSession() {
 /* ══════════════════════════════════════════════════════════════════════════
    HISTORY
 ══════════════════════════════════════════════════════════════════════════ */
-function getHistory() {
-  try { return JSON.parse(localStorage.getItem('workout_history')) || []; }
-  catch { return []; }
+function localDateTime(date) {
+  const pad = value => String(value).padStart(2, '0');
+  return String(date.getFullYear()).padStart(4, '0') + '-' +
+    pad(date.getMonth() + 1) + '-' + pad(date.getDate()) + 'T' +
+    pad(date.getHours()) + ':' + pad(date.getMinutes());
 }
+
+function historyOrder(record) {
+  if (/^\d{4}-\d{2}-\d{2}(?:T\d{2}:\d{2})?$/.test(record.performedAt)) return record.performedAt;
+  const date = new Date(Number(record.id));
+  return Number.isFinite(date.getTime()) ? localDateTime(date) : '';
+}
+
+function sortHistory(records) {
+  return records.sort((a, b) =>
+    historyOrder(b).localeCompare(historyOrder(a)) || Number(b.id) - Number(a.id)
+  );
+}
+
+function getHistory() {
+  try {
+    const records = JSON.parse(localStorage.getItem('workout_history'));
+    return Array.isArray(records) ? sortHistory(records) : [];
+  } catch {
+    return [];
+  }
+}
+
+function pastWorkoutHasSets() {
+  return [...document.querySelectorAll('#past-workout-exercises input')].some(input => input.value !== '' || input.validity.badInput);
+}
+
+function openPastWorkout() {
+  const form = document.getElementById('past-workout-form');
+  form.reset();
+  const choice = document.getElementById('past-workout-choice');
+  document.getElementById('past-workout-exercises').replaceChildren();
+  choice.replaceChildren(new Option('Choose a workout', ''), ...Object.values(WORKOUTS)
+    .map(workout => new Option(workout.name, workout.id)));
+  document.getElementById('past-workout-date').max = localDateTime(new Date()).slice(0, 10);
+  document.getElementById('past-workout-status').textContent = '';
+  showPastWorkoutExercises();
+  showScreen('past-workout');
+  window.scrollTo(0, 0);
+  choice.focus();
+}
+
+function closePastWorkout() {
+  if (pastWorkoutHasSets() && !confirm('Discard this past workout entry?')) return;
+  showScreen('history');
+  document.getElementById('log-past-workout').focus();
+}
+
+function addPastSet(container, timed) {
+  const row = document.getElementById('past-set-template').content.firstElementChild.cloneNode(true);
+  const reps = row.querySelector('[name="reps"]');
+  if (timed) {
+    reps.placeholder = 'sec';
+    reps.setAttribute('aria-label', 'Hold in seconds');
+  }
+  row.querySelector('button').onclick = () => {
+    row.remove();
+    if (!container.childElementCount) addPastSet(container, timed).focus();
+    else container.parentElement.querySelector('.past-add-set').focus();
+  };
+  container.append(row);
+  return row.querySelector('[name="kg"]');
+}
+
+function showPastWorkoutExercises() {
+  const choice = document.getElementById('past-workout-choice');
+  const container = document.getElementById('past-workout-exercises');
+  if (pastWorkoutHasSets() && choice.dataset.workout !== choice.value &&
+      !confirm('Change workouts and discard the sets you entered?')) {
+    choice.value = choice.dataset.workout;
+    return;
+  }
+  choice.dataset.workout = choice.value;
+  const workout = WORKOUTS[choice.value];
+  container.replaceChildren();
+  document.getElementById('past-workout-date-time').hidden = !workout;
+  document.getElementById('past-workout-date').disabled = !workout;
+  document.getElementById('past-workout-save').hidden = !workout;
+  document.getElementById('past-workout-error').textContent = '';
+  if (!workout) return;
+
+  const exercises = [
+    ...(workout.amrap?.rounds ?? []),
+    ...workout.groups.flatMap(group => group.exercises)
+  ];
+  for (const exercise of exercises) {
+    const card = document.getElementById('past-exercise-template').content.firstElementChild.cloneNode(true);
+    card.dataset.exercise = exercise.name;
+    card.querySelector('.ex-name').textContent = exercise.name;
+    card.querySelector('.ex-scheme').textContent = exercise.scheme ?? exercise.reps;
+    const sets = card.querySelector('.past-sets');
+    const timed = Boolean(exercise.holdTimer || /\bsec\b/.test(exercise.scheme ?? ''));
+    if (timed) card.dataset.unit = 'sec';
+    card.querySelector('.past-add-set').onclick = () => addPastSet(sets, timed).focus();
+    addPastSet(sets, timed);
+    container.append(card);
+  }
+}
+
+function savePastWorkout(event) {
+  event.preventDefault();
+  const choice = document.getElementById('past-workout-choice');
+  const workout = WORKOUTS[choice.value];
+  if (!workout) return;
+
+  const date = document.getElementById('past-workout-date').value;
+  const time = document.getElementById('past-workout-time').value;
+  const performedAt = time ? date + 'T' + time : date;
+  const displayDate = new Date(date + 'T12:00:00');
+  const error = document.getElementById('past-workout-error');
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) ||
+      localDateTime(displayDate).slice(0, 10) !== date ||
+      performedAt > localDateTime(new Date())) {
+    error.textContent = 'Enter a valid date and time up to now.';
+    return;
+  }
+
+  const exercises = [];
+  for (const card of document.querySelectorAll('#past-workout-exercises .ex-card')) {
+    const sets = [...card.querySelectorAll('.past-set-row')].map(row => ({
+      kg: row.querySelector('[name="kg"]').value,
+      reps: row.querySelector('[name="reps"]').value,
+      done: true
+    })).filter(set => set.kg !== '' || set.reps !== '');
+    if (sets.length) {
+      const entry = { name: card.dataset.exercise, sets };
+      if (card.dataset.unit) entry.unit = card.dataset.unit;
+      exercises.push(entry);
+    }
+  }
+
+  const records = getHistory();
+  const ids = new Set(records.map(record => String(record.id)));
+  let id = Date.now();
+  while (ids.has(String(id))) id++;
+  records.push({
+    id,
+    workoutId: workout.id,
+    workoutName: workout.name,
+    performedAt,
+    date: displayDate.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }),
+    duration: '',
+    exercises
+  });
+  try {
+    localStorage.setItem('workout_history', JSON.stringify(sortHistory(records)));
+  } catch {
+    error.textContent = 'The workout could not be saved. Your entries are still here.';
+    return;
+  }
+  showScreen('history');
+  document.getElementById('past-workout-status').textContent = workout.name + ' saved.';
+  document.getElementById('log-past-workout').focus();
+  window.scrollTo(0, 0);
+}
+
+document.getElementById('past-workout-choice').addEventListener('change', showPastWorkoutExercises);
+document.getElementById('past-workout-form').addEventListener('submit', savePastWorkout);
 
 function renderHistory() {
   const history = getHistory();
@@ -1714,7 +1939,7 @@ function renderHistory() {
   if (history.length === 0) {
     content.innerHTML = `<div class="empty-state">
       <div class="empty-state-icon">📋</div>
-      <div class="empty-state-text">No sessions yet.<br>Complete a workout to see your history here.</div>
+      <div class="empty-state-text">No sessions yet.<br>Complete or log a workout to see it here.</div>
     </div><div class="nav-spacer"></div>`;
     return;
   }
@@ -1723,16 +1948,18 @@ function renderHistory() {
   history.forEach(record => {
     const typeMap = { 'push-a': 'push', 'push-b': 'push', 'pull-a': 'pull', 'pull-b': 'pull', 'ant-1': 'ant', 'ant-2': 'ant', 'kb-power': 'kb', 'ab-circuit': 'ab', 'band-push': 'band', 'band-pull': 'band' };
     const type = typeMap[record.workoutId] || WORKOUTS[record.workoutId]?.type || 'push';
+    const time = /^\d{4}-\d{2}-\d{2}T(\d{2}:\d{2})$/.exec(record.performedAt)?.[1];
+    const sessionDetails = [record.duration, record.date, time].filter(Boolean).join(' · ');
     const dotColor = { push: 'var(--push)', pull: 'var(--pull)', upper: 'var(--upper)', ant: 'var(--ant)', kb: 'var(--kb)', ab: 'var(--ab)', band: 'var(--band)' }[type];
 
-    html += `<div class="history-card">
+    html += `<div class="history-card" data-has-duration="${Boolean(record.duration)}">
       <div class="history-header">
         <div>
           <div class="history-name" style="display:flex;align-items:center;gap:8px">
             <span style="width:8px;height:8px;border-radius:50%;background:${dotColor};display:inline-block;flex-shrink:0"></span>
             ${record.workoutName}
           </div>
-          <div class="history-duration">${record.duration} · ${record.date}</div>
+          <div class="history-duration">${sessionDetails}</div>
         </div>
       </div>`;
 
@@ -1740,8 +1967,9 @@ function renderHistory() {
       html += `<div class="history-exercises">`;
       record.exercises.forEach(ex => {
         const setsStr = ex.sets.map(s => {
-          if (s.kg && s.reps) return `${s.kg}kg × ${s.reps}`;
-          if (s.reps) return `${s.reps} reps`;
+          const seconds = ex.unit === 'sec';
+          if (s.kg && s.reps) return `${s.kg}kg × ${s.reps}${seconds ? ' sec' : ''}`;
+          if (s.reps) return `${s.reps} ${seconds ? 'sec' : 'reps'}`;
           return `${s.kg}kg`;
         }).join(', ');
         html += `<div class="history-ex-row"><strong>${ex.name}</strong> — ${setsStr}</div>`;

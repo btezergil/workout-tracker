@@ -14,7 +14,7 @@ async function importHistory(file){
  if(!Array.isArray(incoming)||!incoming.every(valid)){alert('This does not look like a valid workout history export. Nothing was changed.');return}
  const old=history(),ids=new Set(old.map(r=>String(r.id))),add=incoming.filter(r=>!ids.has(String(r.id)));
  if(!confirm(`Import ${incoming.length} sessions? ${add.length} are new. Existing sessions will be kept and duplicates skipped.`))return;
- localStorage.setItem(HISTORY_KEY,JSON.stringify([...old,...add].sort((a,b)=>Number(b.id)-Number(a.id))));if(typeof renderHistory==='function')renderHistory();alert(`Import complete. Added ${add.length} session${add.length===1?'':'s'}.`);
+ localStorage.setItem(HISTORY_KEY,JSON.stringify(sortHistory([...old,...add])));if(typeof renderHistory==='function')renderHistory();alert(`Import complete. Added ${add.length} session${add.length===1?'':'s'}.`);
 }
 function transferUI(){
  const bar=document.querySelector('#screen-history .topbar'),clear=bar?.querySelector('.topbar-action');if(!bar||!clear||document.getElementById('history-transfer-actions'))return;
@@ -116,7 +116,7 @@ function restore(){
  Object.keys(setData).forEach(i=>{const l=document.getElementById('log-'+i);if(!l)return;l.style.display='block';if(document.getElementById('sets-'+i))renderSets(+i)});
  const bar=document.getElementById('timer-bar');if(bar)bar.style.display='flex';const btn=document.querySelector('#screen-workout .start-btn');if(btn)btn.style.display='none';stopTimer();timerNow();startTimer();
 }
-function bikeHistory(){document.querySelectorAll('#history-content .history-card').forEach(c=>{const n=c.querySelector('.history-name');if(!n||!/Zone 2 Bike/.test(n.textContent))return;const d=n.querySelector('span');if(d)d.style.background='var(--bike)';[...c.children].forEach(x=>{if(/No sets logged/.test(x.textContent||''))x.textContent='Duration tracked · Zone 2 aerobic ride'})})}
+function bikeHistory(){document.querySelectorAll('#history-content .history-card').forEach(c=>{const n=c.querySelector('.history-name');if(!n||!/Zone 2 Bike/.test(n.textContent))return;const d=n.querySelector('span');if(d)d.style.background='var(--bike)';if(c.dataset.hasDuration==='false')return;[...c.children].forEach(x=>{if(/No sets logged/.test(x.textContent||''))x.textContent='Duration tracked · Zone 2 aerobic ride'})})}
 function historyDecor(){if(typeof renderHistory!=='function')return;const old=renderHistory;renderHistory=function(){old();bikeHistory()}}
 function styles(){const s=document.createElement('style');s.textContent=`:root{--bike:#38bdf8;--bike-bg:#06222b}#screen-workout{height:100dvh;min-height:0;overflow:hidden}#screen-workout .topbar{flex-shrink:0}#screen-workout .timer-bar{position:sticky;top:0;z-index:9;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.28)}#screen-workout .scroll-area{min-height:0}.history-transfer-actions{display:flex;align-items:center;gap:10px}.history-transfer-btn,.history-clear-btn{appearance:none;border:0;background:none;font:inherit;font-size:13px;font-weight:500;cursor:pointer;padding:5px 0}.history-transfer-btn{color:var(--push)}.history-clear-btn{color:#c44}.badge-bike{background:var(--bike-bg);color:var(--bike)}@media(max-width:380px){.history-transfer-actions{gap:8px}.history-transfer-btn,.history-clear-btn{font-size:12px}}`;document.head.appendChild(s)}
 function init(){program();aliases();styles();bikeCard();transferUI();historyDecor();persistence();counts();restore()}
