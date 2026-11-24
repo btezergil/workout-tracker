@@ -86,6 +86,7 @@
   }
   .nav-btn.active { color: var(--push); }
   .nav-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .bottom-nav[hidden] { display: none; }
   .nav-spacer { height: 70px; flex-shrink: 0; }
 
   /* ── SCROLLABLE CONTENT ── */
@@ -191,6 +192,55 @@
   .past-entry-error { color: var(--warn); margin: 8px 0; }
   .past-entry-error:empty, #past-workout-status:empty { display: none; }
   #past-workout-status { margin-bottom: 12px; }
+
+  /* ── MOVEMENTS ── */
+  #screen-movements .scroll-area { width: 100%; }
+  .movement-controls { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+  .movement-input {
+    width: 100%; min-height: 44px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 8px 10px; color: var(--text);
+    color-scheme: dark; font: inherit; font-size: 16px;
+  }
+  select.movement-input {
+    appearance: none; padding-right: 28px;
+    background-image: linear-gradient(45deg, transparent 50%, #aaa 50%), linear-gradient(135deg, #aaa 50%, transparent 50%);
+    background-position: calc(100% - 14px) center, calc(100% - 10px) center;
+    background-size: 4px 4px; background-repeat: no-repeat;
+  }
+  .movement-group { margin-top: 18px; }
+  .movement-group h2 { margin-bottom: 6px; font-size: 13px; color: #aaa; }
+  .movement-card {
+    width: 100%; display: block; text-align: left; font: inherit; color: var(--text);
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 10px 12px; margin-bottom: 6px; cursor: pointer;
+  }
+  .movement-card:hover { background: var(--surface2); }
+  .movement-card-name { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-weight: 600; }
+  .movement-card-name::after { content: '›'; color: var(--push); font-weight: 400; font-size: 20px; line-height: 1; }
+  .movement-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 6px; }
+  .movement-stat-label, .movement-help { color: #aaa; font-size: 12px; }
+  .movement-stat-value { display: block; font-size: 13px; }
+  .movement-note { display: block; color: #aaa; font-size: 12px; margin-top: 4px; overflow-wrap: anywhere; }
+  .movement-note[hidden], #movement-status:empty { display: none; }
+  .movement-help { margin: 8px 0; }
+  .movement-back { margin-right: 10px; }
+  .movement-dialog {
+    position: fixed; inset: 0; margin: auto; width: min(420px, calc(100% - 28px)); max-height: calc(100dvh - 28px);
+    padding: 16px; background: var(--surface); color: var(--text); border: 1px solid var(--border);
+    border-radius: var(--radius); color-scheme: dark;
+  }
+  .movement-dialog::backdrop { background: rgba(0, 0, 0, 0.66); }
+  .movement-dialog-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .movement-dialog-head h2 { font-size: 17px; }
+  .movement-fields, .movement-fields label { display: grid; gap: 6px; min-width: 0; }
+  .movement-fields { border: 0; gap: 10px; margin-top: 10px; }
+  .movement-fields[hidden], .movement-fields label[hidden] { display: none; }
+  .movement-fields label { font-size: 13px; }
+  .movement-set-fields { display: flex; gap: 8px; }
+  .movement-set-fields label { flex: 1; }
+  .movement-save { margin-top: 14px; }
+  .movement-remove { color: #f08b8b; }
+
   .log-x { font-size: 14px; color: var(--dim); padding: 0 2px; }
   .log-done-btn {
     font-size: 12px; padding: 5px 10px; border-radius: var(--radius-sm);
@@ -398,7 +448,8 @@
 
   @media (min-width: 480px) {
     .scroll-area { max-width: 480px; margin: 0 auto; }
-    .topbar, .bottom-nav { max-width: 480px; left: 50%; transform: translateX(-50%); }
+    .topbar { width: 100%; max-width: 480px; margin-inline: auto; }
+    .bottom-nav { width: 480px; left: 50%; right: auto; transform: translateX(-50%); }
     .timer-bar { max-width: 480px; margin: 0 auto; }
   }
 </style>
@@ -565,16 +616,6 @@
     <div class="nav-spacer"></div>
   </div>
 
-  <div class="bottom-nav">
-    <button class="nav-btn active" onclick="showScreen('home')">
-      <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
-      Workouts
-    </button>
-    <button class="nav-btn" onclick="showScreen('history')">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
-      History
-    </button>
-  </div>
 </div>
 
 <!-- ══════════════════════════════════ WORKOUT VIEW ══════════════════════════ -->
@@ -585,6 +626,7 @@
       <div class="topbar-title" id="wkt-title">Workout</div>
       <div class="topbar-sub" id="wkt-sub"></div>
     </div>
+    <button type="button" class="past-set-button" id="workout-movements" onclick="movementLibrary.openFromWorkout()">Moves</button>
   </div>
   <div class="timer-bar" id="timer-bar" style="display:none">
     <div>
@@ -612,17 +654,81 @@
       <div class="nav-spacer"></div>
     </div>
   </div>
-  <div class="bottom-nav">
-    <button class="nav-btn" onclick="showScreen('home')">
-      <svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
-      Workouts
-    </button>
-    <button class="nav-btn active" onclick="showScreen('history')">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
-      History
-    </button>
+</div>
+
+<div id="screen-movements" class="screen">
+  <div class="topbar">
+    <button type="button" class="past-set-button movement-back" id="movement-back" onclick="movementLibrary.returnToWorkout()" hidden>‹ Workout</button>
+    <div class="topbar-title" style="flex:1">Movements</div>
+    <button type="button" class="past-set-button" id="movement-add">+ Add move</button>
+  </div>
+  <div class="scroll-area">
+    <div class="movement-controls">
+      <input id="movement-search" class="movement-input" type="search" placeholder="Search moves" aria-label="Search movements">
+      <select id="movement-category" class="movement-input" aria-label="Muscle group"></select>
+    </div>
+    <p class="movement-help">Working sets default to your last logged gym set. PR uses the heaviest load, then reps or time.</p>
+    <p id="movement-status" class="movement-help" role="status"></p>
+    <div id="movement-list"></div>
+    <div class="nav-spacer"></div>
   </div>
 </div>
+
+<template id="movement-card-template">
+  <button type="button" class="movement-card">
+    <span class="movement-card-name"></span>
+    <span class="movement-note" hidden></span>
+    <span class="movement-stats">
+      <span><span class="movement-stat-label movement-working-label">Working weight</span><span class="movement-stat-value movement-weight"></span></span>
+      <span><span class="movement-stat-label">PR</span><span class="movement-stat-value movement-pr"></span></span>
+    </span>
+  </button>
+</template>
+
+<dialog id="movement-dialog" class="movement-dialog" aria-labelledby="movement-editor-title">
+  <form id="movement-editor">
+    <div class="movement-dialog-head">
+      <h2 id="movement-editor-title">Add movement</h2>
+      <button type="button" class="past-set-button" id="movement-cancel">Cancel</button>
+    </div>
+    <fieldset class="movement-fields" id="movement-custom-fields">
+      <label>Name <input class="movement-input" name="moveName" type="text" maxlength="80" required></label>
+      <label>Muscle group <select class="movement-input" name="category" required></select></label>
+      <label>Track <select class="movement-input" name="unit"><option value="reps">Reps</option><option value="sec">Seconds</option></select></label>
+    </fieldset>
+    <div class="movement-fields">
+      <label>Machine or setup (optional) <input class="movement-input" name="setup" type="text" maxlength="120" placeholder="e.g. Cable tower 2, pulley at 5"></label>
+      <div class="movement-set-fields">
+        <label>Working weight (kg) <input class="movement-input" name="workingKg" type="number" inputmode="decimal" step="any" placeholder="Use last logged load"></label>
+        <label hidden>Working time (sec) <input class="movement-input" name="workingSeconds" type="number" inputmode="numeric" min="1" step="1" disabled></label>
+      </div>
+      <div class="movement-set-fields">
+        <label>PR weight (kg) <input class="movement-input" name="prKg" type="number" inputmode="decimal" step="any"></label>
+        <label><span id="movement-count-label">PR reps</span><input class="movement-input" name="prCount" type="number" inputmode="numeric" min="1" step="1"></label>
+      </div>
+    </div>
+    <p class="movement-help" id="movement-history-summary"></p>
+    <p class="movement-help">Use 0 for unweighted sets and a negative weight for assistance.</p>
+    <p id="movement-error" class="past-entry-error" role="alert"></p>
+    <button type="submit" class="start-btn movement-save">Save movement</button>
+    <button type="button" class="past-set-button movement-remove" id="movement-remove" hidden>Remove movement</button>
+  </form>
+</dialog>
+
+<nav class="bottom-nav" aria-label="Main navigation">
+  <button type="button" class="nav-btn active" data-screen="home" aria-current="page" onclick="showScreen('home')">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+    Workouts
+  </button>
+  <button type="button" class="nav-btn" data-screen="movements" onclick="showScreen('movements')">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v16H6zM9 8h6M9 12h6M9 16h4"/></svg>
+    Moves
+  </button>
+  <button type="button" class="nav-btn" data-screen="history" onclick="showScreen('history')">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+    History
+  </button>
+</nav>
 
 <div id="screen-past-workout" class="screen">
   <div class="topbar">
@@ -1384,10 +1490,20 @@ let setData = {};   // { exerciseIndex: { sets: [{kg:'', reps:'', done:false}] }
 /* ══════════════════════════════════════════════════════════════════════════
    NAVIGATION
 ══════════════════════════════════════════════════════════════════════════ */
-function showScreen(name) {
+function showScreen(name, { hideNav = false } = {}) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
+  const nav = document.querySelector('.bottom-nav');
+  const activeTab = nav.querySelector(`[data-screen="${name}"]`);
+  nav.hidden = hideNav || !activeTab;
+  nav.querySelectorAll('.nav-btn').forEach(button => {
+    const active = button === activeTab;
+    button.classList.toggle('active', active);
+    if (active) button.setAttribute('aria-current', 'page');
+    else button.removeAttribute('aria-current');
+  });
   if (name === 'history') renderHistory();
+  if (name === 'movements') movementLibrary.open(hideNav);
 }
 
 function goHome() {
@@ -2139,6 +2255,7 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<script src="./movements.js"></script>
 <script src="./enhancements.js"></script>
 </body>
 </html>
