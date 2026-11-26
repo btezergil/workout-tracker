@@ -186,9 +186,11 @@
   #past-workout-form .log-input { font-size: 16px; }
   #past-workout-exercises .ex-scheme { white-space: normal; text-align: right; }
   .past-sets { padding: 0 14px; }
-  .workout-slot { display: grid; gap: 4px; padding: 0 14px 10px; }
+  .workout-slot { display: flex; align-items: end; gap: 8px; padding: 0 14px 10px; }
+  .workout-slot label { display: grid; gap: 4px; flex: 1; min-width: 0; }
   .workout-slot select { width: 100%; min-height: 44px; font-size: 16px; color-scheme: dark; text-align: left; }
   .workout-slot span { color: var(--muted); font-size: 12px; }
+  .workout-slot button { flex-shrink: 0; white-space: nowrap; }
   .past-add-set { margin-left: 8px; }
   .past-set-row .log-input { flex: 1; min-width: 0; max-width: 100px; min-height: 40px; }
   .past-set-button { background: none; border: 0; color: var(--push); cursor: pointer; font: inherit; min-height: 44px; padding: 0 6px; }
@@ -558,7 +560,7 @@
       <div class="split-dot" style="background:var(--push)"></div>
       <div class="split-info">
         <div class="split-name">Gym Flexible Push</div>
-        <div class="split-meta">3 chest · 2 shoulders · 2 triceps</div>
+        <div class="split-meta">3 chest · 2 shoulders · 2 triceps · 1 core</div>
       </div>
       <div class="split-arrow">›</div>
     </div>
@@ -567,7 +569,7 @@
       <div class="split-dot" style="background:var(--pull)"></div>
       <div class="split-info">
         <div class="split-name">Gym Flexible Pull</div>
-        <div class="split-meta">3 back · 1 shoulders · 2 biceps · 1 forearms</div>
+        <div class="split-meta">3 back · 1 shoulders · 2 biceps · 1 forearms · 1 core</div>
       </div>
       <div class="split-arrow">›</div>
     </div>
@@ -1240,7 +1242,7 @@ const WORKOUTS = {
   },
 
   'gym-flex-push': {
-    id: 'gym-flex-push', name: 'Gym Flexible Push', type: 'push', sub: '3 chest · 2 shoulders · 2 triceps',
+    id: 'gym-flex-push', name: 'Gym Flexible Push', type: 'push', sub: '3 chest · 2 shoulders · 2 triceps · 1 core',
     info: 'Choose a move from the matching group for each slot. You can switch before logging that slot, or skip it by leaving its sets unfinished. The examples show suggested working sets. Rest 2–3 minutes for demanding lifts and 60–90 seconds for isolation work.',
     groups: [
       { label: 'Chest', exercises: [
@@ -1255,12 +1257,15 @@ const WORKOUTS = {
       { label: 'Triceps', exercises: [
         { category: 'Triceps', slot: 'Overhead triceps', defaultMove: 'Overhead cable triceps extension', scheme: '2 × 10–15' },
         { category: 'Triceps', slot: 'Pushdown', defaultMove: 'Rope triceps pushdown', scheme: '2 × 10–15' }
+      ] },
+      { label: 'Core', exercises: [
+        { category: 'Abs', slot: 'Core', defaultMove: 'Abdominal crunch machine', scheme: '2 × 12–15' }
       ] }
     ]
   },
 
   'gym-flex-pull': {
-    id: 'gym-flex-pull', name: 'Gym Flexible Pull', type: 'pull', sub: '3 back · 1 shoulders · 2 biceps · 1 forearms',
+    id: 'gym-flex-pull', name: 'Gym Flexible Pull', type: 'pull', sub: '3 back · 1 shoulders · 2 biceps · 1 forearms · 1 core',
     info: 'Choose a move from the matching group for each slot. You can switch before logging that slot, or skip it by leaving its sets unfinished. The examples show suggested working sets. Rest 2–3 minutes for demanding lifts and 60–90 seconds for isolation work.',
     groups: [
       { label: 'Back', exercises: [
@@ -1277,6 +1282,9 @@ const WORKOUTS = {
       ] },
       { label: 'Forearms', exercises: [
         { category: 'Forearms', slot: 'Forearm / grip', defaultMove: 'Cable wrist curl', scheme: '2 × 10–12' }
+      ] },
+      { label: 'Core', exercises: [
+        { category: 'Abs', slot: 'Core', defaultMove: 'Plank', scheme: '2 × 10–15' }
       ] }
     ]
   },
@@ -1608,28 +1616,55 @@ function exerciseForSlot(slot, movementId, fallbackName) {
     move.id === slot.defaultMove ? slotScheme : slotScheme.replace(/ per side$/, '');
   return {
     ...slot, name: move.name, movementId: move.id, unit: move.unit, slotScheme, scheme,
-    muscle: slot.category, note: move.assisted ? 'Log assistance as negative kg.' : ''
+    muscle: slot.category,
+    note: move.assisted ? 'Log assistance as negative kg.' :
+      move.unit === 'sec' ? 'Enter hold time in seconds in the reps field.' : ''
   };
 }
 
 function addMovePicker(card, exercise, onSelect) {
+  const picker = document.createElement('div');
+  picker.className = 'workout-slot';
   const label = document.createElement('label');
-  label.className = 'workout-slot';
   const caption = document.createElement('span');
   caption.textContent = exercise.slot;
   const select = document.createElement('select');
   select.className = 'log-input';
-  const options = movementLibrary.choices(exercise.category);
-  if (!options.some(option => option.id === exercise.movementId)) {
-    options.push({ id: exercise.movementId, name: exercise.name });
+
+  function refreshOptions() {
+    const options = movementLibrary.choices(exercise.category);
+    if (!options.some(option => option.id === exercise.movementId)) {
+      options.push({ id: exercise.movementId, name: exercise.name });
+    }
+    select.replaceChildren(...options.map(move => new Option(move.name, move.id)));
+    select.value = exercise.movementId;
   }
-  select.append(...options.map(move => new Option(move.name, move.id)));
-  select.value = exercise.movementId;
-  select.addEventListener('change', () => {
-    if (!onSelect(exerciseForSlot(exercise, select.value))) select.value = exercise.movementId;
+
+  function choose(id) {
+    if (id !== exercise.movementId && onSelect(exerciseForSlot(exercise, id))) return;
+    select.value = exercise.movementId;
+    select.focus();
+  }
+
+  refreshOptions();
+  select.addEventListener('focus', refreshOptions);
+  select.addEventListener('change', () => choose(select.value));
+
+  const addButton = document.createElement('button');
+  addButton.type = 'button';
+  addButton.className = 'past-set-button';
+  addButton.textContent = '+ Add move';
+  addButton.setAttribute('aria-label', 'Add move for ' + exercise.slot);
+  addButton.addEventListener('click', () => {
+    movementLibrary.addForSlot(exercise.category, id => {
+      refreshOptions();
+      choose(id);
+    });
   });
+
   label.append(caption, select);
-  card.querySelector('.ex-header').after(label);
+  picker.append(label, addButton);
+  card.querySelector('.ex-header').after(picker);
   return select;
 }
 
