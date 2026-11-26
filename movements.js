@@ -61,6 +61,7 @@ const movementLibrary = (() => {
   const error = document.getElementById('movement-error');
   let moves = [];
   let editing = null;
+  let afterSave = null;
   let workoutScroll = 0;
 
   function readEntries() {
@@ -214,9 +215,11 @@ const movementLibrary = (() => {
       timed ? 'PR seconds' : unit === 'cycles' ? 'PR cycles' : 'PR reps';
   }
 
-  function edit(move) {
+  function edit(move, category = '', callback = null) {
     editing = move;
+    afterSave = callback;
     form.reset();
+    fields.category.disabled = Boolean(category);
     error.textContent = '';
     const customFields = document.getElementById('movement-custom-fields');
     const isSeed = Boolean(move && !move.custom);
@@ -224,7 +227,7 @@ const movementLibrary = (() => {
     removeButton.hidden = !move?.custom;
     document.getElementById('movement-editor-title').textContent = move?.name ?? 'Add movement';
     fields.moveName.value = move?.name ?? '';
-    fields.category.value = move?.category ?? filter.value;
+    fields.category.value = move?.category ?? (category || filter.value);
     fields.unit.value = move?.unit === 'sec' ? 'sec' : 'reps';
     fields.setup.value = move?.setup ?? '';
     fields.workingKg.value = move?.workingKg ?? '';
@@ -239,9 +242,14 @@ const movementLibrary = (() => {
     dialog.showModal();
   }
 
+  function addForSlot(category, callback) {
+    edit(null, category, callback);
+  }
+
   function save(event) {
     event.preventDefault();
     const isCustom = !editing || editing.custom;
+    const entries = readEntries();
     const entry = {
       setup: fields.setup.value.trim(),
       workingKg: numberOrNull(fields.workingKg.value),
@@ -261,7 +269,7 @@ const movementLibrary = (() => {
       entry.category = fields.category.value;
       entry.unit = fields.unit.value;
       const name = entry.name.toLowerCase();
-      if (!name || moves.some(move => move.id !== editing?.id &&
+      if (!name || [...seeds, ...customMoves(entries)].some(move => move.id !== editing?.id &&
           [move.name, move.alias].some(value => value?.toLowerCase() === name))) {
         error.textContent = name ? 'This name is already in use. Include the machine or setup in the name.' : 'Enter a movement name.';
         fields.moveName.focus();
@@ -270,12 +278,19 @@ const movementLibrary = (() => {
     }
 
     const id = editing?.id ?? `custom-${crypto.randomUUID()}`;
-    const entries = readEntries();
     entries[id] = entry;
     try {
       localStorage.setItem(storageKey, JSON.stringify(entries));
     } catch {
       error.textContent = 'The movement could not be saved. Your entries are still here.';
+      return;
+    }
+
+    if (afterSave) {
+      const selectMove = afterSave;
+      afterSave = null;
+      dialog.close();
+      selectMove(id);
       return;
     }
 
@@ -336,5 +351,5 @@ const movementLibrary = (() => {
   form.addEventListener('submit', save);
   removeButton.addEventListener('click', remove);
 
-  return { choices, open, openFromWorkout, returnToWorkout };
+  return { choices, addForSlot, open, openFromWorkout, returnToWorkout };
 })();
