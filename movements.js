@@ -86,14 +86,27 @@ const movementLibrary = (() => {
       ? candidate : previous;
   }
 
-  function workoutStats() {
+  function customMoves(entries) {
+    return Object.entries(entries)
+      .filter(([id, entry]) => id.startsWith('custom-') && entry?.name && categories.includes(entry.category))
+      .map(([id, entry]) => ({ ...entry, id, custom: true, noLoad: 'Unweighted' }));
+  }
+
+  function choices(category) {
+    return [...seeds, ...customMoves(readEntries())]
+      .filter(move => move.category === category)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  function workoutStats(custom) {
+    const movesById = new Map([...seeds, ...custom].map(move => [move.id, move]));
     const stats = new Map();
     // getHistory is already sorted by when the workout was performed.
     for (const workout of getHistory()) {
       if (typeof workout?.workoutId !== 'string' || !workout.workoutId.startsWith('gym-') ||
           !Array.isArray(workout.exercises)) continue;
       for (const exercise of workout.exercises) {
-        const move = seedsByName.get(exercise?.name);
+        const move = movesById.get(exercise?.movementId) ?? seedsByName.get(exercise?.name);
         if (!move || !Array.isArray(exercise.sets)) continue;
         const summary = stats.get(move.id) ?? { latest: null, pr: null };
         // Use the last completed set with a known load in the latest session.
@@ -115,13 +128,11 @@ const movementLibrary = (() => {
 
   function refresh() {
     const entries = readEntries();
-    const stats = workoutStats();
-    const custom = Object.entries(entries)
-      .filter(([id, entry]) => id.startsWith('custom-') && entry?.name && categories.includes(entry.category))
-      .map(([id, entry]) => ({ ...entry, id, custom: true, noLoad: 'Unweighted' }));
+    const custom = customMoves(entries);
+    const stats = workoutStats(custom);
     moves = [
       ...seeds.map(move => ({ ...move, ...entries[move.id], history: stats.get(move.id) })),
-      ...custom
+      ...custom.map(move => ({ ...move, history: stats.get(move.id) }))
     ].sort((a, b) => a.name.localeCompare(b.name));
     renderList();
   }
@@ -325,5 +336,5 @@ const movementLibrary = (() => {
   form.addEventListener('submit', save);
   removeButton.addEventListener('click', remove);
 
-  return { open, openFromWorkout, returnToWorkout };
+  return { choices, open, openFromWorkout, returnToWorkout };
 })();
