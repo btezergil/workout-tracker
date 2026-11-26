@@ -186,6 +186,9 @@
   #past-workout-form .log-input { font-size: 16px; }
   #past-workout-exercises .ex-scheme { white-space: normal; text-align: right; }
   .past-sets { padding: 0 14px; }
+  .workout-slot { display: grid; gap: 4px; padding: 0 14px 10px; }
+  .workout-slot select { width: 100%; min-height: 44px; font-size: 16px; color-scheme: dark; text-align: left; }
+  .workout-slot span { color: var(--muted); font-size: 12px; }
   .past-add-set { margin-left: 8px; }
   .past-set-row .log-input { flex: 1; min-width: 0; max-width: 100px; min-height: 40px; }
   .past-set-button { background: none; border: 0; color: var(--push); cursor: pointer; font: inherit; min-height: 44px; padding: 0 6px; }
@@ -547,6 +550,24 @@
       <div class="split-info">
         <div class="split-name">Gym Upper Body</div>
         <div class="split-meta">Chest, back, shoulders, arms & grip · 12 exercises · 26 working sets · ~65–80 min</div>
+      </div>
+      <div class="split-arrow">›</div>
+    </div>
+
+    <div class="split-card" onclick="openWorkout('gym-flex-push')">
+      <div class="split-dot" style="background:var(--push)"></div>
+      <div class="split-info">
+        <div class="split-name">Gym Flexible Push</div>
+        <div class="split-meta">3 chest · 2 shoulders · 2 triceps</div>
+      </div>
+      <div class="split-arrow">›</div>
+    </div>
+
+    <div class="split-card" onclick="openWorkout('gym-flex-pull')">
+      <div class="split-dot" style="background:var(--pull)"></div>
+      <div class="split-info">
+        <div class="split-name">Gym Flexible Pull</div>
+        <div class="split-meta">3 back · 1 shoulders · 2 biceps · 1 forearms</div>
       </div>
       <div class="split-arrow">›</div>
     </div>
@@ -1218,6 +1239,48 @@ const WORKOUTS = {
     ]
   },
 
+  'gym-flex-push': {
+    id: 'gym-flex-push', name: 'Gym Flexible Push', type: 'push', sub: '3 chest · 2 shoulders · 2 triceps',
+    info: 'Choose a move from the matching group for each slot. You can switch before logging that slot, or skip it by leaving its sets unfinished. The examples show suggested working sets. Rest 2–3 minutes for demanding lifts and 60–90 seconds for isolation work.',
+    groups: [
+      { label: 'Chest', exercises: [
+        { category: 'Chest', slot: 'Chest press', defaultMove: 'Machine chest press', scheme: '3 × 6–10' },
+        { category: 'Chest', slot: 'Incline press', defaultMove: 'Incline dumbbell press', scheme: '3 × 8–12' },
+        { category: 'Chest', slot: 'Chest isolation', defaultMove: 'Pec deck fly', scheme: '2 × 12–15' }
+      ] },
+      { label: 'Shoulders', exercises: [
+        { category: 'Shoulders', slot: 'Shoulder press', defaultMove: 'Seated machine shoulder press', scheme: '2 × 8–12' },
+        { category: 'Shoulders', slot: 'Lateral raise', defaultMove: 'Cable lateral raise', scheme: '2 × 12–20' }
+      ] },
+      { label: 'Triceps', exercises: [
+        { category: 'Triceps', slot: 'Overhead triceps', defaultMove: 'Overhead cable triceps extension', scheme: '2 × 10–15' },
+        { category: 'Triceps', slot: 'Pushdown', defaultMove: 'Rope triceps pushdown', scheme: '2 × 10–15' }
+      ] }
+    ]
+  },
+
+  'gym-flex-pull': {
+    id: 'gym-flex-pull', name: 'Gym Flexible Pull', type: 'pull', sub: '3 back · 1 shoulders · 2 biceps · 1 forearms',
+    info: 'Choose a move from the matching group for each slot. You can switch before logging that slot, or skip it by leaving its sets unfinished. The examples show suggested working sets. Rest 2–3 minutes for demanding lifts and 60–90 seconds for isolation work.',
+    groups: [
+      { label: 'Back', exercises: [
+        { category: 'Back', slot: 'Vertical pull', defaultMove: 'Lat pulldown', scheme: '3 × 8–12' },
+        { category: 'Back', slot: 'Row', defaultMove: 'Chest-supported machine row', scheme: '3 × 8–12' },
+        { category: 'Back', slot: 'Back accessory', defaultMove: 'Straight-arm cable pulldown', scheme: '2 × 12–15' }
+      ] },
+      { label: 'Shoulders', exercises: [
+        { category: 'Shoulders', slot: 'Rear delts', defaultMove: 'Reverse pec deck', scheme: '2 × 12–20' }
+      ] },
+      { label: 'Biceps', exercises: [
+        { category: 'Biceps', slot: 'Curl', defaultMove: 'Preacher curl', scheme: '2 × 10–15' },
+        { category: 'Biceps', slot: 'Hammer curl', defaultMove: 'Dumbbell hammer curl', scheme: '2 × 10–15' }
+      ] },
+      { label: 'Forearms', exercises: [
+        { category: 'Forearms', slot: 'Forearm / grip', defaultMove: 'Dumbbell forearm pronation / supination', scheme: '2 × 10–12 per side' }
+      ] }
+    ]
+  },
+
   'ant-1': {
     id: 'ant-1', name: 'Antagonist Day 1', type: 'ant',
     sub: 'Chest & back supersets · ~50 min',
@@ -1482,6 +1545,7 @@ const WORKOUTS = {
    STATE
 ══════════════════════════════════════════════════════════════════════════ */
 let currentWorkoutId = null;
+let currentWorkout = null;
 let sessionActive = false;
 let sessionStart = null;
 let timerInterval = null;
@@ -1526,18 +1590,97 @@ function getLastSession(workoutId) {
   const last = history.find(record => record.workoutId === workoutId && record.exercises?.length);
   if (!last) return null;
   const map = {};
-  last.exercises.forEach(ex => { map[ex.name] = ex.sets; });
+  last.exercises.forEach(ex => { map[ex.movementId ?? ex.name] = ex.sets; });
   return { map, date: last.date, duration: last.duration };
 }
 
 let lastSessionData = null; // holds last session info while building workout HTML
 
-function openWorkout(id) {
+function exerciseForSlot(slot, movementId, fallbackName) {
+  const options = movementLibrary.choices(slot.category);
+  const move = options.find(option => option.id === movementId) ??
+    (fallbackName && movementId ? { id: movementId, name: fallbackName } : null) ??
+    options.find(option => option.id === slot.defaultMove);
+  const slotScheme = slot.slotScheme ?? slot.scheme;
+  const sets = slotScheme.split(' × ')[0];
+  const scheme = move.unit === 'sec' ? sets + ' × 20–45 sec' :
+    move.unit === 'cycles' ? sets + ' × 5–8 cycles' :
+    move.id === slot.defaultMove ? slotScheme : slotScheme.replace(/ per side$/, '');
+  return {
+    ...slot, name: move.name, movementId: move.id, unit: move.unit, slotScheme, scheme,
+    muscle: slot.category, note: move.assisted ? 'Log assistance as negative kg.' : ''
+  };
+}
+
+function addMovePicker(card, exercise, onSelect) {
+  const label = document.createElement('label');
+  label.className = 'workout-slot';
+  const caption = document.createElement('span');
+  caption.textContent = exercise.slot;
+  const select = document.createElement('select');
+  select.className = 'log-input';
+  const options = movementLibrary.choices(exercise.category);
+  if (!options.some(option => option.id === exercise.movementId)) {
+    options.push({ id: exercise.movementId, name: exercise.name });
+  }
+  select.append(...options.map(move => new Option(move.name, move.id)));
+  select.value = exercise.movementId;
+  select.addEventListener('change', () => {
+    if (!onSelect(exerciseForSlot(exercise, select.value))) select.value = exercise.movementId;
+  });
+  label.append(caption, select);
+  card.querySelector('.ex-header').after(label);
+  return select;
+}
+
+function initialSets(exercise) {
+  const previous = lastSessionData?.map[exercise.movementId ?? exercise.name];
+  return { sets: previous?.length ? previous.map(set => ({
+    kg: set.kg ?? '', reps: set.reps ?? '', done: false
+  })) : [{ kg: '', reps: '', done: false }] };
+}
+
+function addLiveMovePicker(exercise, index) {
+  const card = document.getElementById('excard-' + index);
+  return addMovePicker(card, exercise, replacement => {
+    const previous = initialSets(exercise).sets;
+    const hasEntries = setData[index].sets.some((set, setIndex) =>
+      set.done || String(set.kg) !== String(previous[setIndex]?.kg ?? '') ||
+      String(set.reps) !== String(previous[setIndex]?.reps ?? ''));
+    if (hasEntries && !confirm('Change this move and discard its entered sets?')) return false;
+    Object.assign(exercise, replacement);
+    setData[index] = initialSets(exercise);
+    const color = currentWorkout.type === 'push' ? 'var(--push)' : 'var(--pull)';
+    card.outerHTML = buildExCard(exercise, index, color, false);
+    if (sessionActive) {
+      document.getElementById('log-' + index).style.display = 'block';
+      renderSets(index);
+    }
+    addLiveMovePicker(exercise, index).focus();
+    document.getElementById('workout-content').dispatchEvent(new Event('workout-move-changed'));
+    return true;
+  });
+}
+
+function openWorkout(id, movementIds = [], exerciseNames = []) {
   currentWorkoutId = id;
   sessionActive = false;
   setData = {};
 
-  const wkt = WORKOUTS[id];
+  const template = WORKOUTS[id];
+  let slotIndex = 0;
+  const wkt = {
+    ...template,
+    groups: template.groups.map(group => ({
+      ...group,
+      exercises: group.exercises.map(exercise => {
+        if (!exercise.slot) return exercise;
+        const index = slotIndex++;
+        return exerciseForSlot(exercise, movementIds[index], exerciseNames[index]);
+      })
+    }))
+  };
+  currentWorkout = wkt;
 
   // Reset AMRAP timer state
   clearInterval(amrapInterval);
@@ -1552,15 +1695,7 @@ function openWorkout(id) {
   let exIdx = 0;
   wkt.groups.forEach(group => {
     group.exercises.forEach(ex => {
-      if (lastSessionData && lastSessionData.map[ex.name]) {
-        setData[exIdx] = {
-          sets: lastSessionData.map[ex.name].map(s => ({
-            kg: s.kg || '', reps: s.reps || '', done: false
-          }))
-        };
-      } else {
-        setData[exIdx] = { sets: [{ kg: '', reps: '', done: false }] };
-      }
+      setData[exIdx] = initialSets(ex);
       exIdx++;
     });
   });
@@ -1571,6 +1706,13 @@ function openWorkout(id) {
 
   const content = document.getElementById('workout-content');
   content.innerHTML = buildWorkoutHTML(wkt);
+  let index = 0;
+  for (const group of wkt.groups) {
+    for (const exercise of group.exercises) {
+      if (exercise.slot) addLiveMovePicker(exercise, index);
+      index++;
+    }
+  }
   showScreen('workout');
 }
 
@@ -1680,13 +1822,17 @@ function buildWorkoutHTML(wkt) {
   return html;
 }
 
+function escapeWorkoutText(text) {
+  return String(text).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+}
+
 function buildExCard(ex, idx, typeColor, isAnt) {
   const bg = isAnt ? 'background:var(--ant-bg);border-color:#3a2a60' : '';
 
   // Build previous sets summary string if available
   let prevHtml = '';
-  if (lastSessionData && lastSessionData.map[ex.name]) {
-    const prevSets = lastSessionData.map[ex.name];
+  const prevSets = lastSessionData?.map[ex.movementId ?? ex.name];
+  if (prevSets) {
     const summary = prevSets.map(s => {
       if (s.kg && s.reps) return `${s.kg}kg×${s.reps}`;
       if (s.reps) return `${s.reps} reps`;
@@ -1701,7 +1847,7 @@ function buildExCard(ex, idx, typeColor, isAnt) {
   let html = `<div class="ex-card" id="excard-${idx}" style="${bg}">
     <div class="ex-header">
       <div style="flex:1">
-        <div class="ex-name">${ex.name}</div>
+        <div class="ex-name">${escapeWorkoutText(ex.name)}</div>
         <div class="ex-muscle">${ex.muscle}</div>
         ${prevHtml}
       </div>
@@ -1851,7 +1997,7 @@ function finishSession() {
 
   // Collect logged data
   const exercises = [];
-  const wkt = WORKOUTS[currentWorkoutId];
+  const wkt = currentWorkout;
   let exGlobalIdx = 0;
   wkt.groups.forEach(g => {
     g.exercises.forEach(ex => {
@@ -1859,7 +2005,10 @@ function finishSession() {
       const sets = (setData[idx] && setData[idx].sets) || [];
       const doneSets = sets.filter(s => s.done && (s.kg || s.reps));
       if (doneSets.length > 0) {
-        exercises.push({ name: ex.name, sets: doneSets });
+        const entry = { name: ex.name, sets: doneSets };
+        if (ex.movementId) entry.movementId = ex.movementId;
+        if (ex.unit === 'sec' || ex.unit === 'cycles') entry.unit = ex.unit;
+        exercises.push(entry);
       }
     });
   });
@@ -1976,17 +2125,33 @@ function showPastWorkoutExercises() {
     ...workout.groups.flatMap(group => group.exercises)
   ];
   for (const exercise of exercises) {
-    const card = document.getElementById('past-exercise-template').content.firstElementChild.cloneNode(true);
-    card.dataset.exercise = exercise.name;
-    card.querySelector('.ex-name').textContent = exercise.name;
-    card.querySelector('.ex-scheme').textContent = exercise.scheme ?? exercise.reps;
-    const sets = card.querySelector('.past-sets');
-    const timed = Boolean(exercise.holdTimer || /\bsec\b/.test(exercise.scheme ?? ''));
-    if (timed) card.dataset.unit = 'sec';
-    card.querySelector('.past-add-set').onclick = () => addPastSet(sets, timed).focus();
-    addPastSet(sets, timed);
-    container.append(card);
+    container.append(buildPastExercise(exercise.slot ? exerciseForSlot(exercise) : exercise));
   }
+}
+
+function buildPastExercise(exercise) {
+  const card = document.getElementById('past-exercise-template').content.firstElementChild.cloneNode(true);
+  card.dataset.exercise = exercise.name;
+  card.querySelector('.ex-name').textContent = exercise.name;
+  card.querySelector('.ex-scheme').textContent = exercise.scheme ?? exercise.reps;
+  const sets = card.querySelector('.past-sets');
+  const timed = Boolean(exercise.holdTimer || /\bsec\b/.test(exercise.scheme ?? ''));
+  if (timed) card.dataset.unit = 'sec';
+  else if (exercise.unit === 'cycles') card.dataset.unit = 'cycles';
+  card.querySelector('.past-add-set').onclick = () => addPastSet(sets, timed).focus();
+  addPastSet(sets, timed);
+  if (exercise.slot) {
+    card.dataset.movementId = exercise.movementId;
+    addMovePicker(card, exercise, replacement => {
+      if ([...sets.querySelectorAll('input')].some(input => input.value || input.validity.badInput) &&
+          !confirm('Change this move and discard its entered sets?')) return false;
+      const nextCard = buildPastExercise(replacement);
+      card.replaceWith(nextCard);
+      nextCard.querySelector('select').focus();
+      return true;
+    });
+  }
+  return card;
 }
 
 function savePastWorkout(event) {
@@ -2017,6 +2182,7 @@ function savePastWorkout(event) {
     if (sets.length) {
       const entry = { name: card.dataset.exercise, sets };
       if (card.dataset.unit) entry.unit = card.dataset.unit;
+      if (card.dataset.movementId) entry.movementId = card.dataset.movementId;
       exercises.push(entry);
     }
   }
@@ -2083,12 +2249,12 @@ function renderHistory() {
       html += `<div class="history-exercises">`;
       record.exercises.forEach(ex => {
         const setsStr = ex.sets.map(s => {
-          const seconds = ex.unit === 'sec';
-          if (s.kg && s.reps) return `${s.kg}kg × ${s.reps}${seconds ? ' sec' : ''}`;
-          if (s.reps) return `${s.reps} ${seconds ? 'sec' : 'reps'}`;
+          const unit = ex.unit === 'sec' ? 'sec' : ex.unit === 'cycles' ? 'cycles' : 'reps';
+          if (s.kg && s.reps) return `${s.kg}kg × ${s.reps}${unit === 'reps' ? '' : ' ' + unit}`;
+          if (s.reps) return `${s.reps} ${unit}`;
           return `${s.kg}kg`;
         }).join(', ');
-        html += `<div class="history-ex-row"><strong>${ex.name}</strong> — ${setsStr}</div>`;
+        html += `<div class="history-ex-row"><strong>${escapeWorkoutText(ex.name)}</strong> — ${setsStr}</div>`;
       });
       html += `</div>`;
     } else {

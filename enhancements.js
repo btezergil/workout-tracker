@@ -83,9 +83,13 @@ function saveActive(){
  if(!sessionActive||!currentWorkoutId||!sessionStart)return;
  syncInputs();
  const exerciseNames=[];
- eachExercise(WORKOUTS[currentWorkoutId],exercise=>exerciseNames.push(exercise.name));
+ const movementIds=[];
+ eachExercise(currentWorkout,exercise=>{
+  exerciseNames.push(exercise.name);
+  movementIds.push(exercise.movementId ?? null);
+ });
  localStorage.setItem(ACTIVE_KEY,JSON.stringify({
-  workoutId:currentWorkoutId,sessionStart,savedAt:Date.now(),exerciseNames,setData
+  workoutId:currentWorkoutId,sessionStart,savedAt:Date.now(),exerciseNames,movementIds,setData
  }));
 }
 function clearActive(){localStorage.removeItem(ACTIVE_KEY)}
@@ -94,6 +98,7 @@ function timerNow(){const e=document.getElementById('timer-val');if(!e||!session
 function persistence(){
  if(typeof startSession!=='function')return;
  const ss=startSession;startSession=function(){ss();saveActive()};
+ document.getElementById('workout-content').addEventListener('workout-move-changed',saveActive);
  const us=updateSet;updateSet=function(...a){us(...a);saveActive()};
  const td=toggleDone;toggleDone=function(...a){td(...a);saveActive()};
  const as=addSet;addSet=function(...a){as(...a);saveActive()};
@@ -104,12 +109,13 @@ function persistence(){
 function restore(){
  const s=savedActive();if(!s?.workoutId||!s.sessionStart||!WORKOUTS[s.workoutId])return;
  if(Date.now()-s.sessionStart>12*60*60*1000&&!confirm('An unfinished workout from more than 12 hours ago was found. Resume it?')){clearActive();return}
- openWorkout(s.workoutId);
+ openWorkout(s.workoutId,s.movementIds ?? [],s.exerciseNames ?? []);
  let index=0;
- eachExercise(WORKOUTS[s.workoutId],exercise=>{
+ eachExercise(currentWorkout,exercise=>{
   const savedName=s.exerciseNames?.[index]??exercise.replaces??exercise.name;
   const savedSets=s.setData?.[index];
-  if(savedName===exercise.name&&savedSets)setData[index]=savedSets;
+  const matches=exercise.movementId ? s.movementIds?.[index]===exercise.movementId : savedName===exercise.name;
+  if(matches&&savedSets)setData[index]=savedSets;
   index++;
  });
  sessionActive=true;sessionStart=Number(s.sessionStart);
