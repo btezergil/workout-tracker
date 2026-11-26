@@ -13,7 +13,7 @@ const movementLibrary = (() => {
       'Seated dumbbell shoulder press', 'Seated machine shoulder press', 'Shoulder press'
     ],
     Back: [
-      'Assisted pull-up', 'Chest-supported machine row', 'Dumbbell shrug',
+      'Assisted pull-up', 'Barbell shrug', 'Chest-supported machine row', 'Dumbbell shrug',
       'Incline-bench I-Y-T raise', 'Lat pulldown', 'Pull-up (unassisted)',
       'Seated cable row', 'Single-arm row', 'Straight-arm cable pulldown'
     ],
@@ -24,7 +24,7 @@ const movementLibrary = (() => {
       'Cable pushdown', 'Overhead cable triceps extension', 'Parallel-bar dip',
       'Rope triceps pushdown', 'Single-arm cable pushdown'
     ],
-    Forearms: ['Dead hang', 'Dumbbell forearm pronation / supination', 'Straight-bar finger curl', 'Wrist roller'],
+    Forearms: ['Cable wrist curl', 'Dead hang', 'Dumbbell forearm pronation / supination', 'Straight-bar finger curl', 'Wrist roller'],
     Abs: ['Abdominal crunch machine', 'Hanging leg raise', 'Plank'],
     Legs: ['Barbell back squat', 'Dumbbell reverse lunge', 'Dumbbell Romanian deadlift']
   };
